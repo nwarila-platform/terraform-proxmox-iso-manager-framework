@@ -10,25 +10,18 @@ and SHA-verify a single ISO; the calling Terraform configuration emits a Packer
 - A Proxmox VE cluster reachable via the bpg/proxmox provider.
 - A storage datastore on Proxmox with ISO content type enabled (e.g. `cephFS`, `local`).
 - A Proxmox API token with the privileges required by `proxmox_download_file`.
-- Terraform `= 1.15.1` exactly. Use `tfenv` or `asdf` if you manage multiple versions
-  on one workstation. Per [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md),
+- The exact Terraform version pinned in [`../../terraform/versions.tf`](../../terraform/versions.tf).
+  Use `tfenv` or `asdf` if you manage multiple versions on one workstation. Per
+  [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md),
   any other Terraform version causes `terraform init` to fail.
 
 ## Step 1: Pin the module in your Terraform configuration
 
-In your Packer template repo's Terraform code:
+In your Packer template repo's Terraform code, use the exact Terraform and provider pins
+from [`../../terraform/versions.tf`](../../terraform/versions.tf), then configure the
+provider and module call:
 
 ```hcl
-terraform {
-  required_version = "= 1.15.1"
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "= 0.105.0"
-    }
-  }
-}
-
 provider "proxmox" {
   endpoint  = "https://proxmox.example.test:8006/"
   api_token = var.proxmox_api_token
@@ -36,7 +29,7 @@ provider "proxmox" {
 }
 
 module "iso" {
-  source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=v1.0.1"
+  source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=<release-tag>"
 
   family = "rocky9"
   iso_pin = {
@@ -53,8 +46,8 @@ The `//terraform` segment in the module `source` is non-optional. It tells Terra
 look for the module HCL inside the repository's `terraform/` subdirectory rather than at
 the root. Omitting it produces a `terraform init` failure with no clear error.
 
-Use non-tokenized ISO URLs. Query strings and fragments are rejected because Terraform
-outputs and state include the echoed `iso_url` for provenance.
+Use non-tokenized ISO URLs. Query strings, fragments, and embedded credentials are
+rejected because Terraform outputs and state include the echoed `iso_url` for provenance.
 
 ## Step 2: Emit a Packer pkrvars.hcl file
 
@@ -88,7 +81,7 @@ fresh download on the next apply.
 
 When upstream releases a new ISO version:
 
-1. Fetch the new SHA256 from a trusted upstream channel (e.g. the upstream's signed
+1. Fetch the new SHA-256 from a trusted upstream channel (e.g. the upstream's signed
    `CHECKSUM` file, **not** the same mirror as the URL — see [threat-model.md](../explanation/threat-model.md)
    for why this matters).
 2. Update the `iso_pin` object in your Terraform code: new `url`, new `sha256`, new
@@ -103,17 +96,16 @@ When upstream releases a new ISO version:
 
 When this module ships a new version:
 
-1. Update `?ref=v1.0.1` to the new tag in your `module "iso"` block.
-2. Update `required_version = "= 1.15.1"` and `version = "= 0.105.0"` if the new module
-   version pins different versions. The new module's README documents the required
-   versions.
+1. Update `?ref=<old-release-tag>` to the new tag in your `module "iso"` block.
+2. Update the Terraform and provider pins if the new module version changes them. The new
+   module's README documents the required versions.
 3. Run `terraform init -upgrade` and `terraform plan`; review the diff.
 4. Run `terraform apply`.
 
 ## Troubleshooting
 
-- **`terraform init` fails with "required Terraform version is = 1.15.1"**: install
-  Terraform 1.15.1 exactly. This is intentional — see
+- **`terraform init` fails with a required Terraform version error**: install the exact
+  Terraform version pinned by the module. This is intentional - see
   [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md).
 - **`proxmox_download_file` fails with checksum mismatch**: the SHA in `iso_pin` does
   not match the upstream file. Either upstream changed the file (in which case re-fetch

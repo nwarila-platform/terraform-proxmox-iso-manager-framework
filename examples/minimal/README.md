@@ -1,8 +1,8 @@
 # Minimal Example
 
-This fixture shows the smallest normal consumer shape: configure the Proxmox provider,
-call the module from `../../terraform`, and pass `module.iso.iso_path` to downstream
-tooling.
+Smallest normal consumer shape: configure the Proxmox provider, call the module from a
+pinned release tag, and pass `module.iso.iso_path` to downstream tooling.
 
-It is intentionally not a runnable public demo because `terraform apply` requires a real
-Proxmox endpoint, storage datastore, and credentials supplied by the operator.
+Consumers should pin `source` to a release tag, not a branch. For the complete contract,
+see [Terraform reference](../../docs/reference/terraform.md) and
+[Packer usage](../../docs/how-to/use-from-a-packer-template.md).
