@@ -24,12 +24,14 @@ Do not edit these files directly; changes must land at the master location in
 | [0002](org/0002-adopt-diataxis-documentation-framework.md)     | Adopt Diátaxis as the Documentation Framework                  | Accepted | 2026-04-24 |
 | [0003](org/0003-use-deny-all-gitignore-strategy.md)            | Use a Deny-All `.gitignore` Strategy                           | Accepted | 2026-04-25 |
 | [0004](org/0004-use-renovate-for-dependency-updates.md)        | Use Renovate for Dependency Updates with Shared Org Baseline   | Accepted | 2026-05-05 |
+| [0005](org/0005-pin-terraform-and-provider-versions-exactly.md) | Pin Terraform and Provider Versions Exactly                    | Accepted | 2026-05-05 |
 
 ### Repository-Specific
 
 | #                                                              | Title                                                              | Status   | Date       |
 | -------------------------------------------------------------- | ------------------------------------------------------------------ | -------- | ---------- |
 | [0001](repo/0001-terraform-subdirectory-layout.md)             | Place Module HCL in a `terraform/` Subdirectory                    | Accepted | 2026-05-05 |
+| [0002](repo/0002-use-repo-local-renovate-baseline.md)          | Use a Repo-Local Renovate Baseline Until Org Preset Exists         | Accepted | 2026-05-05 |
 
 ## How to Contribute a New ADR
 
