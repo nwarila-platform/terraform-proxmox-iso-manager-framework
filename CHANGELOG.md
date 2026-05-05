@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.1.0...v1.1.1) (2026-05-05)
+
+
+### Bug Fixes
+
+* **lint:** allow duplicate headings under different parents in CHANGELOG ([#14](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/issues/14)) ([fd9fb1b](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/commit/fd9fb1b3129e5587833b46271e78d7e84bf3a3e4))
+
 ## [1.1.0](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.0.2...v1.1.0) (2026-05-05)
 
 
