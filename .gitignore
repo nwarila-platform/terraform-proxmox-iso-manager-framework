@@ -72,6 +72,28 @@
 !/docs/explanation/
 !/docs/explanation/threat-model.md
 
+# Allow cross-quadrant architecture/evidence docs that index the module's proof points.
+!/docs/architecture.md
+!/docs/release-gates.md
+!/docs/testing-strategy.md
+
+# ----- [ Runnable examples ] ----------------------------------------------------------------------
+
+# Allow copyable consumer fixtures that prove the module contract in human-readable form.
+!/examples/
+!/examples/minimal/
+!/examples/minimal/README.md
+!/examples/minimal/main.tf
+!/examples/packer-consumer/
+!/examples/packer-consumer/README.md
+!/examples/packer-consumer/main.tf
+!/examples/packer-consumer/build.pkr.hcl
+!/examples/adoption-recovery/
+!/examples/adoption-recovery/README.md
+!/examples/adoption-recovery/main.tf
+!/examples/failure-cases/
+!/examples/failure-cases/README.md
+
 # ----- [ Release automation ] ---------------------------------------------------------------------
 
 # Allow release-please config so changelog sections and release type stay versioned.

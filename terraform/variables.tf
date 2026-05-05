@@ -17,10 +17,11 @@ variable "family" {
 
 variable "iso_pin" {
   description = <<-EOT
-    Pin specifying the exact ISO this module will manage on Proxmox storage. The url is
-    fetched once on first apply (or when sha256 changes); the sha256 is enforced server-side
-    by the Proxmox download endpoint after the file lands. The filename is the on-disk name
-    in the target storage's iso/ directory.
+    Pin specifying the exact ISO this module will manage on Proxmox storage. The url is a
+    non-tokenized HTTPS URL with a host and path, and it may not contain whitespace, query
+    strings, or fragments. The url is fetched once on first apply (or when sha256 changes);
+    the sha256 is enforced server-side by the Proxmox download endpoint after the file
+    lands. The filename is the on-disk name in the target storage's iso/ directory.
 
     The consumer's git repository is the long-lived audit trail for this pin: replacing the
     pin in the consumer's HCL records the ISO change in git history with full diffability.
@@ -32,8 +33,8 @@ variable "iso_pin" {
   })
 
   validation {
-    condition     = can(regex("^https://", var.iso_pin.url))
-    error_message = "iso_pin.url must be an https:// URL. Plain http and other schemes are rejected."
+    condition     = can(regex("^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?/[^\\s?#]+$", var.iso_pin.url))
+    error_message = "iso_pin.url must be a non-tokenized https:// URL with a host and path, and must not contain whitespace, query strings, or fragments."
   }
 
   validation {
@@ -57,8 +58,8 @@ variable "node" {
   type        = string
 
   validation {
-    condition     = length(trimspace(var.node)) > 0
-    error_message = "The node value must not be empty."
+    condition     = can(regex("^[A-Za-z0-9._-]+$", var.node))
+    error_message = "The node value must consist of letters, digits, hyphens, dots, and underscores only."
   }
 }
 
@@ -70,8 +71,23 @@ variable "storage" {
   type        = string
 
   validation {
-    condition     = length(trimspace(var.storage)) > 0
-    error_message = "The storage value must not be empty."
+    condition     = can(regex("^[A-Za-z0-9._-]+$", var.storage))
+    error_message = "The storage value must consist of letters, digits, hyphens, dots, and underscores only."
+  }
+}
+
+variable "upload_timeout" {
+  description = <<-EOT
+    Timeout in seconds for the Proxmox download-url operation. Defaults to one hour so
+    large installer ISOs can be fetched reliably on homelab or WAN-backed storage without
+    weakening transport verification.
+  EOT
+  type        = number
+  default     = 3600
+
+  validation {
+    condition     = var.upload_timeout >= 60 && var.upload_timeout <= 86400
+    error_message = "upload_timeout must be between 60 and 86400 seconds."
   }
 }
 

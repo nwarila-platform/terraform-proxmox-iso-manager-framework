@@ -17,6 +17,20 @@ Proxmox ISO path such as `cephFS:iso/Rocky-9.6-x86_64-dvd.iso`. Per-OS Packer
 template repositories import this module so ISO selection is reviewed in Git, applied
 through Terraform, and consumed by Packer without manual Proxmox console work.
 
+## What This Demonstrates
+
+This repository treats a small Terraform child module like a production platform
+component:
+
+- exact Terraform/provider pinning
+- mock-based Terraform tests
+- SHA-verified ISO lifecycle
+- explicit threat model
+- runnable consumer examples validated in CI
+- release automation
+- security scanning and secret scanning
+- ADR-backed design decisions
+
 ## What It Does
 
 - Downloads exactly one installer ISO to a target Proxmox VE datastore.
@@ -102,17 +116,27 @@ a fresh download on the next apply.
 - Import the module from the `//terraform` subdirectory.
 - Pin the module to a release tag, not a branch.
 - Run Terraform `= 1.15.1` and `bpg/proxmox = 0.105.0` exactly.
+- Use non-tokenized ISO URLs. Query strings and fragments are rejected so signed URLs do
+  not leak through outputs, plans, or state.
 - Keep the ISO pin in the consumer repo so ISO changes are reviewed like code.
 - Leave `overwrite_unmanaged = false` during normal operation.
+
+## Examples
+
+- [Minimal module call](examples/minimal/)
+- [Packer consumer fixture](examples/packer-consumer/)
+- [Adoption and recovery fixture](examples/adoption-recovery/)
+- [Failure case notes](examples/failure-cases/)
 
 ## Inputs
 
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `family` | `string` | required | Template family discriminator (e.g. `rocky9`). Provenance-only: echoed back through the `family` output but not consumed by any resource. Must match `[a-z0-9._-]+`. |
-| `iso_pin` | `object({ url, sha256, filename })` | required | Pin specifying exactly which ISO to manage. `url` must be HTTPS; `sha256` must be a 64-character lowercase hex digest; `filename` must end in `.iso`. |
-| `node` | `string` | required | Proxmox node name on which the download is performed. |
-| `storage` | `string` | required | Proxmox storage datastore (e.g. `cephFS`, `local`). Must have ISO content type enabled. |
+| `iso_pin` | `object({ url, sha256, filename })` | required | Pin specifying exactly which ISO to manage. `url` must be a non-tokenized HTTPS URL with host and path, and no whitespace, query string, or fragment; `sha256` must be a 64-character lowercase hex digest; `filename` must end in `.iso`. |
+| `node` | `string` | required | Proxmox node name on which the download is performed. Must match `[A-Za-z0-9._-]+`. |
+| `storage` | `string` | required | Proxmox storage datastore (e.g. `cephFS`, `local`). Must have ISO content type enabled and match `[A-Za-z0-9._-]+`. |
+| `upload_timeout` | `number` | `3600` | Timeout in seconds for the Proxmox download-url operation. Must be between 60 and 86400. |
 | `overwrite` | `bool` | `false` | Allow provider-managed replacement when the managed file size changes. Leave false for pinned ISO inputs. |
 | `overwrite_unmanaged` | `bool` | `false` | Delete and replace a same-named unmanaged file during deliberate adoption or recovery. |
 
@@ -123,7 +147,7 @@ a fresh download on the next apply.
 | `iso_id` | `string` | Proxmox file ID `<datastore>:<volume_id>`. Canonical identifier the provider uses. |
 | `iso_path` | `string` | `<storage>:iso/<filename>`. Pass directly into Packer's `iso_file`. |
 | `iso_sha256` | `string` | Echoed back from input. Useful for provenance recording. |
-| `iso_url` | `string` | Upstream URL. Useful for provenance recording. |
+| `iso_url` | `string` | Non-tokenized upstream URL. Useful for provenance recording. |
 | `iso_filename` | `string` | On-disk filename. |
 | `family` | `string` | Echoed back for downstream labels and provenance. |
 | `node` | `string` | Where the download was performed. |
@@ -133,6 +157,9 @@ a fresh download on the next apply.
 
 - [Use from a Packer template repo](docs/how-to/use-from-a-packer-template.md)
 - [Develop this module](docs/how-to/develop-this-module.md)
+- [Architecture](docs/architecture.md)
+- [Testing strategy](docs/testing-strategy.md)
+- [Release gates](docs/release-gates.md)
 - [Terraform reference](docs/reference/terraform.md)
 - [Threat model](docs/explanation/threat-model.md)
 - [Decision records](docs/decision-records/README.md)
@@ -147,8 +174,8 @@ This repo is intentionally small, but it is treated like production infrastructu
 
 - Exact Terraform and provider pins, documented by org ADR-0005.
 - Validation tests for accepted and rejected input contracts.
-- CI gates for Terraform format/validate/test, workflow linting, markdown linting,
-  CodeQL, Trivy, and Gitleaks.
+- CI gates for Terraform format/validate/test, example validation, workflow linting,
+  markdown linting, CodeQL, Trivy, and Gitleaks.
 - Release Please automation for SemVer tags and GitHub releases.
 - Renovate-managed dependency update flow for Terraform, GitHub Actions, Docker action
   images, and the CI Terraform version input.

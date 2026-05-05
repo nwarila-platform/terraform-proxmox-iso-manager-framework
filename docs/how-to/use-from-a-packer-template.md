@@ -53,6 +53,9 @@ The `//terraform` segment in the module `source` is non-optional. It tells Terra
 look for the module HCL inside the repository's `terraform/` subdirectory rather than at
 the root. Omitting it produces a `terraform init` failure with no clear error.
 
+Use non-tokenized ISO URLs. Query strings and fragments are rejected because Terraform
+outputs and state include the echoed `iso_url` for provenance.
+
 ## Step 2: Emit a Packer pkrvars.hcl file
 
 ```hcl
