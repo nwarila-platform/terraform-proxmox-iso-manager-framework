@@ -15,7 +15,10 @@ double-slash path syntax — see `README.md` for the canonical `source =` form.
 │   ├── variables.tf
 │   └── versions.tf
 ├── docs/
-│   └── ADR/                # architectural decision records
+│   ├── decision-records/   # ADRs (org mirrors + repo-specific) per org ADR-0001
+│   ├── reference/          # Diátaxis: lookup material (per org ADR-0002)
+│   ├── how-to/             # Diátaxis: goal-directed guides
+│   └── explanation/        # Diátaxis: conceptual background
 ├── README.md               # consumer-facing usage
 ├── CONTRIBUTING.md
 ├── SECURITY.md
@@ -105,8 +108,11 @@ way. Leaving `release-as` in place would freeze every release at 1.0.0 regardles
 commit content.
 
 Dependency-update PRs are opened by Renovate (see
-[ADR-0002](docs/ADR/0002-renovate-instead-of-dependabot.md)) on a weekly schedule. They
-land on `main` like any other PR and feed the same release-please pipeline.
+[org ADR-0004](docs/decision-records/org/0004-use-renovate-for-dependency-updates.md))
+on a weekly schedule. They land on `main` like any other PR and feed the same
+release-please pipeline. Terraform CLI and provider versions are exact-pinned per
+[org ADR-0005](docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md);
+each Renovate bump is a reviewable PR that the maintainer should test before merging.
 
 ## Security
 
