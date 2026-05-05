@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.1.1...v1.1.2) (2026-05-05)
+
+
+### Bug Fixes
+
+* **ci:** auto-dispatch release-evidence after release-please publishes ([#16](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/issues/16)) ([5a9a5f4](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/commit/5a9a5f415f53678b61452fa85a356c7ca32dd094))
+
 ## [1.1.1](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.1.0...v1.1.1) (2026-05-05)
 
 
