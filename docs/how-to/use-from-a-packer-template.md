@@ -36,7 +36,7 @@ provider "proxmox" {
 }
 
 module "iso" {
-  source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=v1.0.0"
+  source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=v1.0.1"
 
   family = "rocky9"
   iso_pin = {
@@ -100,7 +100,7 @@ When upstream releases a new ISO version:
 
 When this module ships a new version:
 
-1. Update `?ref=v1.0.0` to the new tag in your `module "iso"` block.
+1. Update `?ref=v1.0.1` to the new tag in your `module "iso"` block.
 2. Update `required_version = "= 1.15.1"` and `version = "= 0.105.0"` if the new module
    version pins different versions. The new module's README documents the required
    versions.
