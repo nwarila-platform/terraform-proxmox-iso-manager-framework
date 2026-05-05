@@ -18,7 +18,8 @@ valid_input := {
 }
 
 test_valid_input_allows if {
-  count(deny with input as valid_input) == 0
+  messages := deny with input as valid_input
+  count(messages) == 0
 }
 
 test_rejects_query_string if {
