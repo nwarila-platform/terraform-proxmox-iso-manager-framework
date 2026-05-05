@@ -40,11 +40,11 @@ the ISO their build consumes.
 
 ```hcl
 terraform {
-  required_version = ">= 1.9"
+  required_version = "= 1.9.8"
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = ">= 0.98.1"
+      version = "= 0.98.1"
     }
   }
 }
@@ -113,8 +113,13 @@ org convention for reusable artifacts that consumer repos import (parallel to
 
 | Provider | Version | Why |
 |---|---|---|
-| `terraform` | `>= 1.9` | Validation blocks + ergonomic `regex`/`can` |
-| `bpg/proxmox` | `>= 0.98.1` | `proxmox_download_file` resource with checksum + checksum_algorithm |
+| `terraform` | `= 1.9.8` | Validation blocks + ergonomic `regex`/`can`. **Exact-pinned** per [org ADR-0005](docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md); consumers must run Terraform 1.9.8 exactly. |
+| `bpg/proxmox` | `= 0.98.1` | `proxmox_download_file` resource with checksum + checksum_algorithm. **Exact-pinned** per the same ADR. |
+
+> **Note on version pinning.** Both Terraform and the provider are pinned exactly (the
+> `=` operator), not as ranges. This is intentional: every consumer runs the exact
+> version the module was tested against. `terraform init` will fail fast on any other
+> version. Use `tfenv` or `asdf` to manage per-project Terraform versions if needed.
 
 ## Security
 
