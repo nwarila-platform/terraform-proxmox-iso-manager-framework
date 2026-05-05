@@ -1,8 +1,12 @@
 # terraform-proxmox-iso-manager-framework
 
-[![PR Validation](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/pr-validation.yaml/badge.svg)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/pr-validation.yaml)
-[![Security Scan](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/security.yaml/badge.svg)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/security.yaml)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Repo CI](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/repo-ci.yml?branch=main&label=Repo%20CI)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/repo-ci.yml)
+[![Terraform Tests](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/pr-validation.yaml?branch=main&label=Terraform%20Tests)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/pr-validation.yaml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/security.yaml?branch=main&label=Security)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/security.yaml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/codeql.yaml?branch=main&label=CodeQL)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/codeql.yaml)
+[![Latest Release](https://img.shields.io/github/v/release/nwarila-platform/terraform-proxmox-iso-manager-framework?label=Release)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/releases)
+[![Renovate](https://img.shields.io/badge/Renovate-enabled-1A1F6C?logo=renovatebot&logoColor=white)](https://docs.renovatebot.com/)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Terraform child module for one job: make the exact installer ISO a Packer template
@@ -146,7 +150,12 @@ This repo is intentionally small, but it is treated like production infrastructu
 - CI gates for Terraform format/validate/test, workflow linting, markdown linting,
   CodeQL, Trivy, and Gitleaks.
 - Release Please automation for SemVer tags and GitHub releases.
-- Renovate-managed dependency update flow for Terraform and GitHub Actions pins.
+- Renovate-managed dependency update flow for Terraform, GitHub Actions, Docker action
+  images, and the CI Terraform version input.
+
+Terraform modules do not produce a meaningful line-coverage percentage. The test signal
+for this repo is the `Terraform Tests` badge, backed by `terraform test`; the security
+signal is split across Security Scan (Trivy + Gitleaks) and CodeQL.
 
 ## Provider Requirements
 
