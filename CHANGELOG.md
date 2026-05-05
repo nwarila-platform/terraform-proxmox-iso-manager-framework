@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.0.0...v1.0.1) (2026-05-05)
+
+
+### Bug Fixes
+
+* satisfy changelog markdown lint ([975df29](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/commit/975df2987bab2bab63efafd0becd555b84346533))
+
 ## 1.0.0 (2026-05-05)
 
 ### Features
