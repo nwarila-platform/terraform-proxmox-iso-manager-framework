@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.0.1...v1.0.2) (2026-05-05)
+
+
+### Bug Fixes
+
+* harden module contract with runnable examples ([7e34a0e](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/commit/7e34a0e0afaa283f2041f7110871d596e3bd68bb))
+
 ## [1.0.1](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.0.0...v1.0.1) (2026-05-05)
 
 
