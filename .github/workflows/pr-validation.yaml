@@ -4,9 +4,9 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - '*.tf'
+      - 'terraform/**'
       - 'examples/**'
-      - '.github/workflows/**'
+      - '.github/workflows/pr-validation.yaml'
       - '.editorconfig'
   workflow_dispatch:
 
@@ -22,6 +22,10 @@ jobs:
     name: Terraform fmt + validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform
 
     steps:
       - name: Check out repository
@@ -37,13 +41,11 @@ jobs:
           terraform_wrapper: false
 
       - name: Run terraform fmt (recursive check)
-        shell: bash
         run: |
           set -euo pipefail
           terraform fmt -check -recursive .
 
       - name: Run terraform init + validate
-        shell: bash
         run: |
           set -euo pipefail
           terraform init -backend=false

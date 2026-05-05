@@ -1,0 +1,31 @@
+{
+  // Schema for editor validation. Update only when intentionally adopting a new schema.
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  // Inherit the org-wide Renovate baseline per ADR-0004 (org). The shared config
+  // (schedule, semantic-commit prefixes, dependency-dashboard, prConcurrentLimit,
+  // github-actions.pinDigests, packageRules) lives at
+  // nwarila-platform/.github/.github/renovate.json5; this file adds only the
+  // repo-specific overrides below.
+  "extends": [
+    "github>nwarila-platform/.github"
+  ],
+
+  // Bump (not pin) for >= constraints. This module is a child module imported via
+  // git source; pinning to exact versions would force downstream consumers into
+  // exact-version coupling and would break the ability for consumers to satisfy
+  // multiple modules' provider constraints simultaneously. See ADR-0001 (repo).
+  "terraform": {
+    "rangeStrategy": "bump"
+  },
+
+  // Repo-specific packageRule for the terraform manager. The github-actions
+  // packageRule is inherited from the org baseline and does not need restating.
+  "packageRules": [
+    {
+      "matchManagers": ["terraform"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "terraform"
+    }
+  ]
+}

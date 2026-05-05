@@ -1,8 +1,11 @@
 variable "family" {
   description = <<-EOT
-    Template family discriminator (e.g. "rocky9", "ubuntu24"). Echoed back as an output for
-    downstream provenance and label correlation. Must match Proxmox tag character constraints
-    (lowercase letters, digits, hyphens, dots, underscores).
+    Template family discriminator (e.g. "rocky9", "ubuntu24"). Provenance-only: this
+    value is NOT consumed by any resource in this module — it is echoed back through the
+    `family` output so consumers (typically Packer template repos) can correlate the
+    managed ISO with the template family it feeds. Must match Proxmox tag character
+    constraints (lowercase letters, digits, hyphens, dots, underscores) so consumers can
+    pass it directly into Proxmox tags downstream.
   EOT
   type        = string
 

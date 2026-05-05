@@ -55,7 +55,7 @@ provider "proxmox" {
 }
 
 module "iso" {
-  source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git?ref=v1.0.0"
+  source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=v1.0.0"
 
   family = "rocky9"
   iso_pin = {
@@ -82,7 +82,7 @@ pin are no-ops. Bumping any field of `iso_pin` triggers a fresh download on the 
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `family` | `string` | required | Template family discriminator (e.g. `rocky9`). Must match `[a-z0-9._-]+`. Echoed back for downstream provenance. |
+| `family` | `string` | required | Template family discriminator (e.g. `rocky9`). **Provenance-only** — echoed back through the `family` output but not consumed by any resource. Must match `[a-z0-9._-]+`. |
 | `iso_pin` | `object({ url, sha256, filename })` | required | Pin specifying exactly which ISO to manage. `url` must be HTTPS; `sha256` must be a 64-char lowercase hex digest; `filename` must end in `.iso`. |
 | `node` | `string` | required | Proxmox node name on which the download is performed. |
 | `storage` | `string` | required | Proxmox storage datastore (e.g. `cephFS`, `local`). Must have ISO content type enabled. |
@@ -118,10 +118,12 @@ org convention for reusable artifacts that consumer repos import (parallel to
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for vulnerability disclosure and the coverage of CI security
-scanners. The integrity of the upstream ISO source is **not** in this module's threat
-model — the consumer is responsible for sourcing trustworthy SHA256 values from upstream
-distribution channels.
+See the repository's [Security Policy](../../security/policy) for vulnerability disclosure
+and reporting instructions; the policy is inherited from
+[`nwarila-platform/.github/SECURITY.md`](https://github.com/nwarila-platform/.github/blob/main/SECURITY.md).
+The integrity of the upstream ISO source is **not** in this module's threat model — the
+consumer is responsible for sourcing trustworthy SHA256 values from upstream distribution
+channels.
 
 ## License
 

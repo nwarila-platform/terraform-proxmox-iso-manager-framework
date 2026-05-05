@@ -29,4 +29,4 @@ When opening an issue, include:
 
 - **Bugs**: see [bug report template](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/issues/new?template=bug_report.yml)
 - **Features / contract changes**: see [feature request template](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/issues/new?template=feature_request.yml)
-- **Security**: see [SECURITY.md](SECURITY.md)
+- **Security**: see the repository's [Security Policy](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/security/policy) (inherited from [`nwarila-platform/.github`](https://github.com/nwarila-platform/.github/blob/main/SECURITY.md))
