@@ -9,6 +9,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write
 
 jobs:
   release-please:
@@ -18,7 +19,18 @@ jobs:
 
     steps:
       - name: Run release-please
+        id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # release-please publishes the GitHub release using GITHUB_TOKEN, and
+      # GITHUB_TOKEN-driven events do not cascade to other workflows. Dispatching
+      # release-evidence explicitly via gh CLI works because workflow_dispatch is
+      # exempt from that cascade restriction.
+      - name: Dispatch release-evidence
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run release-evidence.yml --ref "${{ steps.release.outputs.tag_name }}" --repo "${{ github.repository }}"
