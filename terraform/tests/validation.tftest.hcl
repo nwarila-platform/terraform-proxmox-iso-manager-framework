@@ -62,6 +62,24 @@ run "default_safety_flags_fail_closed" {
   }
 }
 
+run "verify_is_always_true" {
+  command = plan
+
+  assert {
+    condition     = proxmox_download_file.iso.verify == true
+    error_message = "TLS verification should always be enabled for Proxmox download-url operations"
+  }
+}
+
+run "upload_timeout_default_is_safe" {
+  command = plan
+
+  assert {
+    condition     = proxmox_download_file.iso.upload_timeout == 3600
+    error_message = "upload_timeout should default to one hour"
+  }
+}
+
 # ----- family validation -----
 
 run "rejects_uppercase_family" {
@@ -127,6 +145,66 @@ run "rejects_file_url" {
   variables {
     iso_pin = {
       url      = "file:///tmp/foo.iso"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_https_url_without_host" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https:///foo.iso"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_https_url_without_path" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https://example.test"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_url_with_whitespace" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https://example.test/foo bar.iso"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_url_with_query_string_token" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https://example.test/foo.iso?token=secret"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_url_with_fragment" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https://example.test/foo.iso#sha256"
       sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
       filename = "foo.iso"
     }
@@ -240,6 +318,14 @@ run "rejects_whitespace_node" {
   expect_failures = [var.node]
 }
 
+run "rejects_node_with_slash" {
+  command = plan
+  variables {
+    node = "cluster/node"
+  }
+  expect_failures = [var.node]
+}
+
 # ----- storage validation -----
 
 run "rejects_empty_storage" {
@@ -256,4 +342,30 @@ run "rejects_whitespace_storage" {
     storage = "  "
   }
   expect_failures = [var.storage]
+}
+
+run "rejects_storage_with_slash" {
+  command = plan
+  variables {
+    storage = "pool/iso"
+  }
+  expect_failures = [var.storage]
+}
+
+# ----- upload_timeout validation -----
+
+run "rejects_upload_timeout_below_minimum" {
+  command = plan
+  variables {
+    upload_timeout = 59
+  }
+  expect_failures = [var.upload_timeout]
+}
+
+run "rejects_upload_timeout_above_maximum" {
+  command = plan
+  variables {
+    upload_timeout = 86401
+  }
+  expect_failures = [var.upload_timeout]
 }
