@@ -47,7 +47,9 @@ Chosen option: **Option 2, inline the required Renovate behavior locally.**
 
 The local config extends Renovate's recommended baseline, enables a dependency dashboard,
 uses semantic commits, runs weekly, pins GitHub Actions by digest, and uses Terraform
-`rangeStrategy: "pin"`.
+`rangeStrategy: "pin"`. It also enables a narrowly scoped `custom.regex` manager for the
+`terraform_version` input in `.github/workflows/pr-validation.yaml`, keeping the CI
+Terraform binary aligned with the exact module constraint in `terraform/versions.tf`.
 
 ## Pros and Cons of the Options
 
@@ -74,7 +76,8 @@ Adherence is confirmed by reviewing `.github/renovate.json5` for:
 
 1. `github-actions` package rules with `pinDigests: true`.
 2. Terraform package rules with `rangeStrategy: "pin"`.
-3. A weekly schedule and dependency dashboard.
+3. `custom.regex` coverage for the `hashicorp/setup-terraform` `terraform_version` input.
+4. A weekly schedule and dependency dashboard.
 
 When `nwarila-platform/.github` publishes a working shared preset, this ADR may be superseded
 and the local config can return to `extends: ["github>nwarila-platform/.github"]`.
