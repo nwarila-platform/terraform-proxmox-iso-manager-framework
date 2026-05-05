@@ -13,7 +13,7 @@ output "iso_path" {
     "cephFS:iso/Rocky-9.6-x86_64-dvd.iso". Pass this directly into the consumer template
     repo's Packer configuration.
   EOT
-  value       = "${var.storage}:iso/${var.iso_pin.filename}"
+  value       = local.iso_path
 }
 
 output "iso_sha256" {
