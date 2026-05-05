@@ -31,7 +31,7 @@
     {
       "matchManagers": ["terraform"],
       "rangeStrategy": "pin",
-      "semanticCommitType": "chore",
+      "semanticCommitType": "deps",
       "semanticCommitScope": "deps"
     }
   ]
