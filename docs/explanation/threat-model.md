@@ -13,8 +13,9 @@ inherited from the organization's special `.github` repository.
   resource enforces this server-side after the file lands.
 - The ISO is downloaded over a non-tokenized HTTPS URL only. The `iso_pin.url` validation
   block in [`terraform/variables.tf`](../../terraform/variables.tf) rejects non-HTTPS
-  schemes, missing hosts, missing paths, whitespace, query strings, and fragments; test
-  coverage in [`terraform/tests/validation.tftest.hcl`](../../terraform/tests/validation.tftest.hcl)
+  schemes, missing hosts, missing paths, whitespace, query strings, fragments, and
+  embedded credentials; test coverage in
+  [`terraform/tests/validation.tftest.hcl`](../../terraform/tests/validation.tftest.hcl)
   verifies those rejection paths.
 - The download is performed by Proxmox, not by the Terraform CLI host. The Terraform
   CLI never sees the ISO bytes; it only sends the URL + SHA + filename to the Proxmox
@@ -63,9 +64,9 @@ This module assumes the following adversaries:
   Defense-in-depth at this layer is the consumer's responsibility (host hardening,
   credential storage, code review).
 - **Secret-bearing URL path segments.** Mitigated only by convention and review. The
-  module rejects query strings and fragments because those are common locations for
-  signed URL material, but it cannot prove that a URL path segment is not itself secret.
-  Consumers must not place tokens in ISO URLs.
+  module rejects query strings, fragments, and embedded credentials because those are
+  common locations for signed URL material, but it cannot prove that a URL path segment is
+  not itself secret. Consumers must not place tokens in ISO URLs.
 - **Compromised Proxmox node.** Out of scope. A compromised Proxmox node can return any
   state the module observes; the trust boundary is at the Proxmox API.
 
@@ -80,7 +81,9 @@ This module assumes the following adversaries:
 - **Family character constraint** matches Proxmox tag character constraints (validation
   block).
 - **`node` and `storage` character constraints** reject path-like values.
-- **No secrets in module inputs.** All credentials are handled by the bpg/proxmox
+- **No secrets in module inputs.** The module intentionally rejects tokenized, presigned,
+  or credential-bearing ISO URLs because Terraform state, plans, logs, and outputs are not
+  safe storage for bearer tokens. All Proxmox credentials are handled by the bpg/proxmox
   provider configuration upstream of this module.
 - **Explicit Proxmox download TLS verification** via `verify = true` on the managed
   resource.

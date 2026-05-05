@@ -1,12 +1,10 @@
 # Packer Consumer Example
 
-This fixture mirrors the intended per-OS template repository pattern:
+Shows the intended handoff after starting from
+[`../minimal/`](../minimal/): Terraform pins, downloads, and verifies the ISO on Proxmox,
+then emits values that a Packer template repository can write into `*.pkrvars.hcl`.
 
-1. Terraform pins and manages the ISO on Proxmox.
-2. Terraform emits Packer-facing values as outputs.
-3. Packer consumes `iso_file` and `iso_checksum` from a `*.pkrvars.hcl` file or an
-   equivalent generated variable source.
-
-The included `build.pkr.hcl` is intentionally minimal. It demonstrates the variable
-contract without trying to build a full OS image. A real consumer repo owns its Packer
-plugin pins and complete builder settings.
+This directory intentionally does not repeat the Terraform/provider version block; the
+minimal example is the canonical copyable root. Real consumers own Packer plugin pins and
+full builder settings. See
+[Use from a Packer template](../../docs/how-to/use-from-a-packer-template.md).
