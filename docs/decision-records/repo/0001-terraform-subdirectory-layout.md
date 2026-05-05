@@ -51,7 +51,7 @@ Module HCL lives under `terraform/`. Specifically:
 - All `.tf` files for this module reside in `/terraform/`. No `.tf` files live at the repository root.
 - Consumers pin via `source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=vX.Y.Z"`. The `//terraform` path component is non-optional; without it, `terraform init` resolves the repository root and fails to find any module configuration.
 - The PR-validation workflow (`.github/workflows/pr-validation.yaml`) runs `terraform fmt -check -recursive .`, `terraform init -backend=false`, and `terraform validate` with `working-directory: terraform`. The path filter that triggers the workflow is scoped to `terraform/**`.
-- The repository root is reserved for governance (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CHANGELOG.md`, `LICENSE`), tooling (`.editorconfig`, `.gitignore`, `.gitattributes`, `.markdownlint-cli2.jsonc`), release automation (`release-please-config.json`, `.release-please-manifest.json`), and `.github/`.
+- The repository root is reserved for repository-specific governance (`README.md`, `CHANGELOG.md`, `LICENSE`), tooling (`.editorconfig`, `.gitignore`, `.gitattributes`, `.markdownlint-cli2.jsonc`), release automation (`release-please-config.json`, `.release-please-manifest.json`), and `.github/` workflow/config files that cannot be inherited. Generic community-health files are inherited from `nwarila-platform/.github`.
 - Architectural decisions live at `docs/decision-records/{org,repo}/` per [ADR-0001 (org)](../org/0001-use-architecture-decision-records.md).
 
 ## Pros and Cons of the Options
@@ -134,13 +134,13 @@ None (current).
 
 ## Implementing PRs
 
-Pending. This ADR ships in the same PR as the workflow `working-directory` fix, the README `source =` URL update, and the CONTRIBUTING.md layout rewrite.
+Pending. This ADR ships in the same PR as the workflow `working-directory` fix, the README `source =` URL update, and the repo-specific development notes now housed under `docs/how-to/`.
 
 ## Related ADRs
 
 - [ADR-0001 (org)](../org/0001-use-architecture-decision-records.md) — establishes the format and dual-scope structure of decision records, including this repo-specific ADR.
 - [ADR-0003 (org)](../org/0003-use-deny-all-gitignore-strategy.md) — establishes the deny-all `.gitignore` strategy. This repo's `.gitignore` allowlist explicitly enumerates `terraform/` and its tracked contents, consistent with that strategy.
-- [ADR-0004 (org)](../org/0004-use-renovate-for-dependency-updates.md) — standardizes Renovate across the org. The `terraform.rangeStrategy: "bump"` override in this repo's `.github/renovate.json5` preserves the child-module compatibility posture that this ADR establishes.
+- [ADR-0004 (org)](../org/0004-use-renovate-for-dependency-updates.md) — standardizes Renovate across the org. [ADR-0002 (repo)](0002-use-repo-local-renovate-baseline.md) records this repo's local Renovate baseline while the org shared preset is not published.
 
 ## Compliance Notes
 

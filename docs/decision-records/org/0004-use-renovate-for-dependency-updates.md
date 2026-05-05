@@ -184,6 +184,7 @@ Pending. The first implementing PR ships in `terraform-proxmox-iso-manager-frame
 
 - [ADR-0001](0001-use-architecture-decision-records.md) — establishes the format and dual-scope structure of decision records.
 - [ADR-0003](0003-use-deny-all-gitignore-strategy.md) — establishes the deny-all `.gitignore` strategy. Renovate config files are explicitly allowlisted in adopting repositories per ADR-0003.
+- [ADR-0005](0005-pin-terraform-and-provider-versions-exactly.md) — refines this ADR's `rangeStrategy` guidance: instead of differentiating child vs root modules, all repos pin Terraform and provider versions exactly. The shared baseline at `nwarila-platform/.github/.github/renovate.json5` accordingly sets `terraform.rangeStrategy: "pin"`.
 
 ## Compliance Notes
 

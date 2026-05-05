@@ -24,21 +24,19 @@
 # Allow changelog so release-please has a target file to maintain.
 !/CHANGELOG.md
 
-# Allow contribution guide so contributors see the local override of org defaults.
-!/CONTRIBUTING.md
-
-# Allow support policy so help routes are documented in-repo.
-# SECURITY.md is intentionally absent — inherited from nwarila-platform/.github
-# per the org community-health-file inheritance pattern.
-!/SUPPORT.md
+# Generic community-health files (CONTRIBUTING.md, SECURITY.md, SUPPORT.md) are
+# intentionally inherited from nwarila-platform/.github.
 
 # Allow license so the module's licensing terms stay clearly attached.
 !/LICENSE
 
 # ----- [ Architecture Decision Records ] ----------------------------------------------------------
 
-# Allow the docs root so governance artefacts can live alongside module HCL.
+# Allow the docs root so governance and Diátaxis material can live alongside module HCL.
 !/docs/
+
+# Allow the Diátaxis index README.
+!/docs/README.md
 
 # Allow the decision-records directory and per-repo index per org ADR-0001.
 !/docs/decision-records/
@@ -52,10 +50,27 @@
 !/docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
 !/docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
 !/docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
+!/docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md
 
 # Allow the repo-specific ADRs.
 !/docs/decision-records/repo/
 !/docs/decision-records/repo/0001-terraform-subdirectory-layout.md
+!/docs/decision-records/repo/0002-use-repo-local-renovate-baseline.md
+
+# ----- [ Diátaxis quadrants ] ---------------------------------------------------------------------
+
+# Allow reference material per org ADR-0002.
+!/docs/reference/
+!/docs/reference/terraform.md
+
+# Allow how-to guides per org ADR-0002.
+!/docs/how-to/
+!/docs/how-to/use-from-a-packer-template.md
+!/docs/how-to/develop-this-module.md
+
+# Allow conceptual explainers per org ADR-0002.
+!/docs/explanation/
+!/docs/explanation/threat-model.md
 
 # ----- [ Release automation ] ---------------------------------------------------------------------
 
@@ -73,27 +88,11 @@
 # Allow code owners so PR review routing stays consistent.
 !/.github/CODEOWNERS
 
-# Allow Renovate config so dependency update behaviour stays versioned. Extends
-# the shared org baseline at nwarila-platform/.github (see org ADR-0004).
+# Allow Renovate config so dependency update behaviour stays versioned.
 !/.github/renovate.json5
 
-# Allow PR template so contribution expectations stay consistent.
-!/.github/pull_request_template.md
-
-# Allow issue template directory so default intake forms stay tracked.
-!/.github/ISSUE_TEMPLATE/
-
-# Allow bug form so defect intake stays structured.
-!/.github/ISSUE_TEMPLATE/01-bug-report.yml
-
-# Allow feature form so enhancement requests stay structured.
-!/.github/ISSUE_TEMPLATE/02-feature-request.yml
-
-# Allow documentation form so docs fixes route through a dedicated template.
-!/.github/ISSUE_TEMPLATE/03-documentation.yml
-
-# Allow issue chooser config so support and security links stay intentional.
-!/.github/ISSUE_TEMPLATE/config.yml
+# Generic issue and pull request templates are intentionally inherited from
+# nwarila-platform/.github.
 
 # Allow workflow directory so repo CI definitions stay tracked.
 !/.github/workflows/
@@ -101,7 +100,7 @@
 # Allow CodeQL workflow so static analysis stays versioned.
 !/.github/workflows/codeql.yaml
 
-# Allow PR validation workflow so terraform fmt/init/validate gates stay versioned.
+# Allow PR validation workflow so terraform fmt/init/validate/test gates stay versioned.
 !/.github/workflows/pr-validation.yaml
 
 # Allow release-please workflow so release automation stays versioned.
@@ -117,7 +116,7 @@
 # and refreshed on a weekly schedule (see org ADR-0001).
 !/.github/workflows/org-adr-sync.yml
 
-# ----- [ Terraform module sources ] ---------------------------------------------------------------
+# ----- [ Terraform module sources and tests ] -----------------------------------------------------
 
 # Allow the terraform module directory so module HCL stays tracked (see repo ADR-0001).
 !/terraform/
@@ -136,3 +135,11 @@
 
 # Allow versions so terraform and provider version constraints stay versioned.
 !/terraform/versions.tf
+
+# Intentionally do not allow terraform/.terraform.lock.hcl. This repo is a consumed child
+# module; root consumers own their provider lockfiles, while this module exact-pins provider
+# compatibility in terraform/versions.tf.
+
+# Allow the tests directory so terraform test coverage stays versioned.
+!/terraform/tests/
+!/terraform/tests/validation.tftest.hcl
