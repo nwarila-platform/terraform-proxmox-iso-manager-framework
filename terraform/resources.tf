@@ -10,8 +10,10 @@ resource "proxmox_download_file" "iso" {
   /* Integrity Verification */
   checksum           = var.iso_pin.sha256
   checksum_algorithm = "sha256"
+  verify             = true
 
   /* Optional Parameters */
+  upload_timeout      = var.upload_timeout
   overwrite           = var.overwrite
   overwrite_unmanaged = var.overwrite_unmanaged
 }

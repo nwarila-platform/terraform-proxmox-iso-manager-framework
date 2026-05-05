@@ -26,7 +26,7 @@ output "iso_sha256" {
 }
 
 output "iso_url" {
-  description = "Upstream URL the ISO was downloaded from. Echoed back for provenance recording."
+  description = "Non-tokenized upstream URL the ISO was downloaded from. Echoed back for provenance recording."
   value       = var.iso_pin.url
 }
 
