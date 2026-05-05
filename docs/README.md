@@ -11,6 +11,12 @@ This directory follows the [Diátaxis](https://diataxis.fr) documentation framew
 | [how-to/](how-to/)             | Step-by-step guides for goal-directed tasks       | "How do I use this from a Packer template?" |
 | [explanation/](explanation/)   | Conceptual background and rationale               | "What's the threat model?" |
 
+## Evidence-Oriented Docs
+
+- [Architecture](architecture.md)
+- [Testing strategy](testing-strategy.md)
+- [Release gates](release-gates.md)
+
 ## Local Development
 
 Repository-specific contributor notes live in

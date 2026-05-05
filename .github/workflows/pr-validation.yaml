@@ -64,3 +64,39 @@ jobs:
         run: |
           set -euo pipefail
           terraform test
+
+  examples:
+    name: Terraform examples validate (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - examples/minimal
+          - examples/packer-consumer
+          - examples/adoption-recovery
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.example }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
+          terraform_version: "1.15.1"
+          terraform_wrapper: false
+
+      - name: Run terraform init + validate
+        run: |
+          set -euo pipefail
+          terraform init -backend=false
+          terraform validate
