@@ -33,18 +33,18 @@ the ISO their build consumes.
 - **ISOs are short-lived build inputs** (N=1 on Proxmox; the upstream + the consumer's
   git-tracked pin is the long-lived audit trail).
 - **This module bridges** the consumer's git-tracked pin to Proxmox cluster state:
-  ensure exactly the pinned ISO is present, no-op if already there, re-download if the pin
-  changes.
+  ensure exactly the pinned ISO is present, no-op once Terraform owns it, and fail closed
+  on unmanaged pre-existing files unless adoption is explicitly requested.
 
 ## Usage
 
 ```hcl
 terraform {
-  required_version = "= 1.9.8"
+  required_version = "= 1.15.1"
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "= 0.98.1"
+      version = "= 0.105.0"
     }
   }
 }
@@ -76,7 +76,8 @@ output "iso_file" {
 
 After the first `terraform apply`, the ISO is present on Proxmox at
 `cephFS:iso/Rocky-9.6-x86_64-dvd.iso` and SHA256-verified. Subsequent applies with the same
-pin are no-ops. Bumping any field of `iso_pin` triggers a fresh download on the next apply.
+pin are no-ops for Terraform-managed files. Bumping any field of `iso_pin` triggers a fresh
+download on the next apply.
 
 ## Inputs
 
@@ -86,7 +87,8 @@ pin are no-ops. Bumping any field of `iso_pin` triggers a fresh download on the 
 | `iso_pin` | `object({ url, sha256, filename })` | required | Pin specifying exactly which ISO to manage. `url` must be HTTPS; `sha256` must be a 64-char lowercase hex digest; `filename` must end in `.iso`. |
 | `node` | `string` | required | Proxmox node name on which the download is performed. |
 | `storage` | `string` | required | Proxmox storage datastore (e.g. `cephFS`, `local`). Must have ISO content type enabled. |
-| `overwrite` | `bool` | `false` | Force re-download even if SHA matches. Use only for explicit recovery. |
+| `overwrite` | `bool` | `false` | Allow provider-managed replacement when the managed file size changes. Leave false for pinned ISO inputs. |
+| `overwrite_unmanaged` | `bool` | `false` | Delete and replace a same-named unmanaged file during deliberate adoption/recovery. |
 
 ## Outputs
 
@@ -113,8 +115,8 @@ org convention for reusable artifacts that consumer repos import (parallel to
 
 | Provider | Version | Why |
 |---|---|---|
-| `terraform` | `= 1.9.8` | Validation blocks + ergonomic `regex`/`can`. **Exact-pinned** per [org ADR-0005](docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md); consumers must run Terraform 1.9.8 exactly. |
-| `bpg/proxmox` | `= 0.98.1` | `proxmox_download_file` resource with checksum + checksum_algorithm. **Exact-pinned** per the same ADR. |
+| `terraform` | `= 1.15.1` | Validation blocks + ergonomic `regex`/`can`. **Exact-pinned** per [org ADR-0005](docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md); consumers must run Terraform 1.15.1 exactly. |
+| `bpg/proxmox` | `= 0.105.0` | `proxmox_download_file` resource with checksum + checksum_algorithm. **Exact-pinned** per the same ADR. |
 
 > **Note on version pinning.** Both Terraform and the provider are pinned exactly (the
 > `=` operator), not as ranges. This is intentional: every consumer runs the exact
@@ -123,9 +125,9 @@ org convention for reusable artifacts that consumer repos import (parallel to
 
 ## Security
 
-See the repository's [Security Policy](../../security/policy) for vulnerability disclosure
-and reporting instructions; the policy is inherited from
-[`nwarila-platform/.github/SECURITY.md`](https://github.com/nwarila-platform/.github/blob/main/SECURITY.md).
+See the repository's [Security Policy](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/security/policy)
+for vulnerability disclosure and reporting instructions. The policy is inherited from the
+organization's special `.github` repository.
 The integrity of the upstream ISO source is **not** in this module's threat model — the
 consumer is responsible for sourcing trustworthy SHA256 values from upstream distribution
 channels.

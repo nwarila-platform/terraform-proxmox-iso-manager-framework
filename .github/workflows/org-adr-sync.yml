@@ -1,12 +1,9 @@
-name: Org ADR Sync
+name: Org ADR Mirror Check
 
-# Caller for the reusable org-adr-sync workflow published at
-# nwarila-platform/.github/.github/workflows/org-adr-sync.yml. Operationalises
-# Confirmation §1 of org ADR-0001 (every adopting repo MUST contain
-# byte-identical mirrors of every accepted org-baseline ADR).
-#
-# - On pull_request: verify the mirrors match the masters; fail the workflow on drift.
-# - On schedule / workflow_dispatch: open (or refresh) a PR that brings mirrors in sync.
+# Local verifier for org ADR mirrors. This intentionally does not call a reusable
+# workflow from nwarila-platform/.github because that repository does not currently
+# publish one. It compares mirrors that exist upstream and warns for local org ADRs
+# whose upstream master has not been published yet.
 
 on:
   pull_request:
@@ -27,20 +24,57 @@ concurrency:
 
 jobs:
   verify:
-    if: github.event_name == 'pull_request'
-    # Org-internal reusable workflow; @main is acceptable per the org's
-    # supply-chain policy carve-out for first-party actions.
-    uses: nwarila-platform/.github/.github/workflows/org-adr-sync.yml@main
-    permissions:
-      contents: read
-    with:
-      mode: verify
+    name: Verify Org ADR Mirrors
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
-  sync:
-    if: github.event_name != 'pull_request'
-    uses: nwarila-platform/.github/.github/workflows/org-adr-sync.yml@main
-    permissions:
-      contents: write
-      pull-requests: write
-    with:
-      mode: sync
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Compare mirrored ADRs with upstream masters
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tmpdir="$(mktemp -d)"
+          trap 'rm -rf "${tmpdir}"' EXIT
+
+          gh api repos/nwarila-platform/.github/contents/docs/decision-records \
+            --jq '.[].name' > "${tmpdir}/upstream-names.txt"
+
+          status=0
+
+          while IFS= read -r local_file; do
+            name="$(basename "${local_file}")"
+
+            if ! grep -qx "${name}" "${tmpdir}/upstream-names.txt"; then
+              echo "::warning file=${local_file}::No upstream org ADR named ${name} exists yet in nwarila-platform/.github; cannot byte-compare this mirror."
+              continue
+            fi
+
+            gh api "repos/nwarila-platform/.github/contents/docs/decision-records/${name}" \
+              --jq .content | base64 --decode > "${tmpdir}/${name}"
+
+            if ! cmp -s "${local_file}" "${tmpdir}/${name}"; then
+              echo "::error file=${local_file}::Org ADR mirror differs from upstream ${name}."
+              status=1
+            fi
+          done < <(find docs/decision-records/org -maxdepth 1 -type f -name '[0-9][0-9][0-9][0-9]-*.md' | sort)
+
+          while IFS= read -r upstream_name; do
+            case "${upstream_name}" in
+              [0-9][0-9][0-9][0-9]-*.md)
+                if [ ! -f "docs/decision-records/org/${upstream_name}" ]; then
+                  echo "::error file=docs/decision-records/org::Missing upstream org ADR mirror ${upstream_name}."
+                  status=1
+                fi
+                ;;
+            esac
+          done < "${tmpdir}/upstream-names.txt"
+
+          exit "${status}"

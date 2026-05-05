@@ -31,6 +31,7 @@ Do not edit these files directly; changes must land at the master location in
 | #                                                              | Title                                                              | Status   | Date       |
 | -------------------------------------------------------------- | ------------------------------------------------------------------ | -------- | ---------- |
 | [0001](repo/0001-terraform-subdirectory-layout.md)             | Place Module HCL in a `terraform/` Subdirectory                    | Accepted | 2026-05-05 |
+| [0002](repo/0002-use-repo-local-renovate-baseline.md)          | Use a Repo-Local Renovate Baseline Until Org Preset Exists         | Accepted | 2026-05-05 |
 
 ## How to Contribute a New ADR
 

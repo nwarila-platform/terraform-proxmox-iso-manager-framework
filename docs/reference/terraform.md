@@ -8,12 +8,12 @@
 
 | Requirement                         | Version    |
 |-------------------------------------|------------|
-| Terraform                           | `= 1.9.8`  |
-| `bpg/proxmox` provider              | `= 0.98.1` |
+| Terraform                           | `= 1.15.1` |
+| `bpg/proxmox` provider              | `= 0.105.0` |
 
 Both are exact-pinned per
 [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md).
-Consumers MUST run Terraform 1.9.8 exactly; `terraform init` fails on any other version.
+Consumers MUST run Terraform 1.15.1 exactly; `terraform init` fails on any other version.
 
 ## Inputs
 
@@ -23,11 +23,15 @@ Consumers MUST run Terraform 1.9.8 exactly; `terraform init` fails on any other 
 | `iso_pin`   | `object({ url, sha256, filename })`        | required     | The ISO to manage. `url` must be HTTPS; `sha256` must be a 64-char lowercase hex digest; `filename` must end in `.iso` and contain no path components or whitespace. |
 | `node`      | `string`                                   | required     | Proxmox node name on which the download is performed. Non-empty. |
 | `storage`   | `string`                                   | required     | Proxmox storage datastore (e.g. `cephFS`, `local`). Must have ISO content type enabled. Non-empty. |
-| `overwrite` | `bool`                                     | `false`      | When true, replace any pre-existing file at the target path even if no SHA mismatch is detected. Use only for explicit recovery. |
+| `overwrite` | `bool`                                     | `false`      | When true, allow provider-managed replacement when the managed file size changes. Leave false for pinned ISO inputs. |
+| `overwrite_unmanaged` | `bool`                           | `false`      | When true, delete and replace a same-named unmanaged file during deliberate adoption/recovery. |
 
 ### Validation rules
 
-Every input has at least one validation block (see [`../../terraform/variables.tf`](../../terraform/variables.tf) and the test coverage in [`../../terraform/tests/validation.tftest.hcl`](../../terraform/tests/validation.tftest.hcl)):
+Every string/object input with constrained syntax has validation coverage (see
+[`../../terraform/variables.tf`](../../terraform/variables.tf) and the test coverage in
+[`../../terraform/tests/validation.tftest.hcl`](../../terraform/tests/validation.tftest.hcl)).
+The boolean safety flags are type-constrained and covered by default-value assertions:
 
 - `family`: lowercase letters, digits, hyphens, dots, underscores only.
 - `iso_pin.url`: HTTPS scheme only — `http://`, `ftp://`, `file://` are rejected.

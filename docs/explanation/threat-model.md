@@ -2,8 +2,9 @@
 
 This document explains what is and is not in the security scope of
 `terraform-proxmox-iso-manager-framework`. For the formal vulnerability-reporting
-policy, see the repository's [Security Policy](../../security/policy) (inherited from
-[`nwarila-platform/.github/SECURITY.md`](https://github.com/nwarila-platform/.github/blob/main/SECURITY.md)).
+policy, see the repository's
+[Security Policy](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/security/policy),
+inherited from the organization's special `.github` repository.
 
 ## What this module guarantees
 

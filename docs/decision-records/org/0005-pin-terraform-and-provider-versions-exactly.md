@@ -49,7 +49,7 @@ The following forces shaped this decision:
 2. **Security and supply-chain consistency.** Exact pins on Terraform and providers match the SHA-pin posture on GitHub Actions. The org's overall stance is "if it can be pinned exactly, pin it exactly."
 3. **Failure-mode visibility.** `terraform init` aborting with "required Terraform version is X, you have Y" is unambiguous. Compatibility issues that surface partway through `terraform plan` or `terraform apply` are harder to diagnose and may leave partial state behind.
 4. **Cross-module composability within the org.** Because the maintainer controls every module, exact-pinning all of them to the same Terraform version is straightforward; multi-module satisfiability concerns do not apply.
-5. **Tested-and-proven posture.** Publishing a module that says "should work with Terraform >= 1.9" makes a claim the maintainer has not actually verified. Pinning `= 1.9.8` says only what has been tested.
+5. **Tested-and-proven posture.** Publishing a module that says "should work with Terraform >= 1.9" makes a claim the maintainer has not actually verified. Pinning `= 1.15.1` says only what has been tested.
 6. **Renovate fitness.** Renovate's `rangeStrategy: "pin"` operates correctly on exact-pinned versions: it bumps the exact version on each update, requiring an explicit author-controlled PR for each change.
 
 ## Considered Options
@@ -92,7 +92,7 @@ This refines the rangeStrategy guidance in [ADR-0004](0004-use-renovate-for-depe
 - **Good, because** it permits patch-level CLI/provider updates without per-update testing or PRs.
 - **Good, because** it is the most common pattern in the wider Terraform community.
 - **Bad, because** consumers may run a slightly different version from the author's tested version; subtle behavior differences slip through.
-- **Bad, because** it weakens the reproducibility argument — "tested with 1.9.8, deployed with 1.9.12" is not the same as "tested and deployed with 1.9.8".
+- **Bad, because** it weakens the reproducibility argument — "tested with 1.15.1, deployed with 1.15.2" is not the same as "tested and deployed with 1.15.1".
 - **Bad, because** Renovate's behavior for `~>` versions is to bump the floor, not pin to the exact version, leaving the same drift surface.
 
 ### Option 3: Minimum constraint (`>= X.Y`)
@@ -161,7 +161,7 @@ None (current).
 
 ## Implementing PRs
 
-Pending. The first implementing PR ships in `terraform-proxmox-iso-manager-framework`, which migrates `terraform/versions.tf` from `required_version = ">= 1.9"` to `= 1.9.8` and from `version = ">= 0.98.1"` to `= 0.98.1`, simplifies `.github/renovate.json5` to inherit the org baseline (which now sets `terraform.rangeStrategy: "pin"`), and adds `terraform test` coverage to enforce the test-before-bump rule.
+Pending. The first implementing PR ships in `terraform-proxmox-iso-manager-framework`, which migrates `terraform/versions.tf` from `required_version = ">= 1.9"` to `= 1.15.1` and from `version = ">= 0.98.1"` to `= 0.105.0`, keeps the effective Renovate policy in repo-local config until the org shared preset exists, and adds `terraform test` coverage to enforce the test-before-bump rule.
 
 ## Related ADRs
 

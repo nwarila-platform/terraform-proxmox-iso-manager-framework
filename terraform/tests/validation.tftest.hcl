@@ -48,6 +48,20 @@ run "valid_inputs_pass_all_validations" {
   }
 }
 
+run "default_safety_flags_fail_closed" {
+  command = plan
+
+  assert {
+    condition     = proxmox_download_file.iso.overwrite == false
+    error_message = "overwrite should default to false"
+  }
+
+  assert {
+    condition     = proxmox_download_file.iso.overwrite_unmanaged == false
+    error_message = "overwrite_unmanaged should default to false"
+  }
+}
+
 # ----- family validation -----
 
 run "rejects_uppercase_family" {
