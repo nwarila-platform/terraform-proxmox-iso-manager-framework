@@ -1,0 +1,38 @@
+name: Feature Request
+description: Propose a new capability, contract change, or improvement.
+title: "[feat] "
+labels: ["enhancement"]
+assignees:
+  - NWarila
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user-facing problem are you trying to solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Sketch the inputs/outputs/behavior change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you weigh? Why is this one preferred?
+
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Breaking change?
+      description: Does this require a major-version bump for consumers?
+      options:
+        - label: This change is backwards-compatible
+        - label: This change is breaking and requires consumers to update their HCL

@@ -1,0 +1,46 @@
+name: Org ADR Sync
+
+# Caller for the reusable org-adr-sync workflow published at
+# nwarila-platform/.github/.github/workflows/org-adr-sync.yml. Operationalises
+# Confirmation §1 of org ADR-0001 (every adopting repo MUST contain
+# byte-identical mirrors of every accepted org-baseline ADR).
+#
+# - On pull_request: verify the mirrors match the masters; fail the workflow on drift.
+# - On schedule / workflow_dispatch: open (or refresh) a PR that brings mirrors in sync.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/decision-records/org/**'
+      - '.github/workflows/org-adr-sync.yml'
+  schedule:
+    - cron: "0 6 * * 1"  # Weekly Monday 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: org-adr-sync-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.event_name == 'pull_request'
+    # Org-internal reusable workflow; @main is acceptable per the org's
+    # supply-chain policy carve-out for first-party actions.
+    uses: nwarila-platform/.github/.github/workflows/org-adr-sync.yml@main
+    permissions:
+      contents: read
+    with:
+      mode: verify
+
+  sync:
+    if: github.event_name != 'pull_request'
+    uses: nwarila-platform/.github/.github/workflows/org-adr-sync.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      mode: sync
