@@ -18,7 +18,18 @@
 
   "enabledManagers": [
     "github-actions",
-    "terraform"
+    "terraform",
+    "custom.regex"
+  ],
+
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/pr-validation\\.yaml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+terraform_version:\\s*\"(?<currentValue>[^\"]+)\""
+      ]
+    }
   ],
 
   "packageRules": [
@@ -31,6 +42,12 @@
     {
       "matchManagers": ["terraform"],
       "rangeStrategy": "pin",
+      "semanticCommitType": "deps",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "matchDepNames": ["hashicorp/terraform"],
+      "groupName": "Terraform CLI",
       "semanticCommitType": "deps",
       "semanticCommitScope": "deps"
     }
