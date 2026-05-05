@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: terraform-fmt
+        name: terraform fmt
+        entry: terraform -chdir=terraform fmt -recursive
+        language: system
+        pass_filenames: false
+        files: ^terraform/.*\.tf$
+
+      - id: terraform-docs
+        name: terraform-docs
+        entry: terraform-docs markdown table --output-file ../docs/reference/terraform.md --output-mode inject terraform
+        language: system
+        pass_filenames: false
+        files: ^terraform/.*\.tf$
+
+      - id: docs-layout
+        name: docs layout
+        entry: python tools/check_docs_layout.py
+        language: system
+        pass_filenames: false
+        files: ^docs/.*\.md$|^tools/check_docs_layout.py$

@@ -1,7 +1,7 @@
 variable "family" {
   description = <<-EOT
     Template family discriminator (e.g. "rocky9", "ubuntu24"). Provenance-only: this
-    value is NOT consumed by any resource in this module — it is echoed back through the
+    value is NOT consumed by any resource in this module - it is echoed back through the
     `family` output so consumers (typically Packer template repos) can correlate the
     managed ISO with the template family it feeds. Must match Proxmox tag character
     constraints (lowercase letters, digits, hyphens, dots, underscores) so consumers can
@@ -19,9 +19,10 @@ variable "iso_pin" {
   description = <<-EOT
     Pin specifying the exact ISO this module will manage on Proxmox storage. The url is a
     non-tokenized HTTPS URL with a host and path, and it may not contain whitespace, query
-    strings, or fragments. The url is fetched once on first apply (or when sha256 changes);
-    the sha256 is enforced server-side by the Proxmox download endpoint after the file
-    lands. The filename is the on-disk name in the target storage's iso/ directory.
+    strings, fragments, or embedded credentials. The url is fetched once on first apply (or
+    when sha256 changes); the sha256 is enforced server-side by the Proxmox download
+    endpoint after the file lands. The filename is the on-disk name in the target storage's
+    iso/ directory.
 
     The consumer's git repository is the long-lived audit trail for this pin: replacing the
     pin in the consumer's HCL records the ISO change in git history with full diffability.
@@ -33,8 +34,10 @@ variable "iso_pin" {
   })
 
   validation {
+    # HTTPS with authority + path only. The authority pattern intentionally excludes "@",
+    # which rejects credential-bearing forms such as https://user:pass@example.test/file.iso.
     condition     = can(regex("^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?/[^\\s?#]+$", var.iso_pin.url))
-    error_message = "iso_pin.url must be a non-tokenized https:// URL with a host and path, and must not contain whitespace, query strings, or fragments."
+    error_message = "iso_pin.url must be a non-tokenized https:// URL with a host and path, and must not contain whitespace, query strings, fragments, or embedded credentials."
   }
 
   validation {

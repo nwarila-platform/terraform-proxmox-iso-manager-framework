@@ -4,164 +4,149 @@
 
 # ----- [ Repository self-management ] -------------------------------------------------------------
 
-# Allow the allowlist itself so tracked scope stays auditable.
 !/.gitignore
-
-# Allow git attributes so line endings and diffs stay deterministic.
 !/.gitattributes
-
-# Allow editor settings shared by all contributors.
 !/.editorconfig
-
-# Allow markdownlint-cli2 config so local and CI markdown rules match.
 !/.markdownlint-cli2.jsonc
+!/.pre-commit-config.yaml
+!/.terraform-docs.yml
+!/.tflint.hcl
+!/Makefile
 
 # ----- [ Top-level documentation ] ----------------------------------------------------------------
 
-# Allow README so consumers see usage instructions on the repository landing page.
 !/README.md
-
-# Allow changelog so release-please has a target file to maintain.
 !/CHANGELOG.md
-
-# Generic community-health files (CONTRIBUTING.md, SECURITY.md, SUPPORT.md) are
-# intentionally inherited from nwarila-platform/.github.
-
-# Allow license so the module's licensing terms stay clearly attached.
 !/LICENSE
 
-# ----- [ Architecture Decision Records ] ----------------------------------------------------------
+# Generic community-health files are inherited from nwarila-platform/.github.
 
-# Allow the docs root so governance and Diátaxis material can live alongside module HCL.
+# ----- [ Documentation ] --------------------------------------------------------------------------
+
 !/docs/
-
-# Allow the Diátaxis index README.
 !/docs/README.md
 
-# Allow the decision-records directory and per-repo index per org ADR-0001.
+# ADRs.
 !/docs/decision-records/
 !/docs/decision-records/README.md
-
-# Allow the org-baseline ADR mirrors. These are kept byte-identical to their
-# masters at nwarila-platform/.github/docs/decision-records/ by the Org ADR Sync
-# workflow; do not edit directly.
 !/docs/decision-records/org/
 !/docs/decision-records/org/0001-use-architecture-decision-records.md
 !/docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
 !/docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
 !/docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
 !/docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md
-
-# Allow the repo-specific ADRs.
 !/docs/decision-records/repo/
 !/docs/decision-records/repo/0001-terraform-subdirectory-layout.md
 !/docs/decision-records/repo/0002-use-repo-local-renovate-baseline.md
+!/docs/decision-records/repo/0003-allow-example-local-readmes.md
 
-# ----- [ Diátaxis quadrants ] ---------------------------------------------------------------------
-
-# Allow reference material per org ADR-0002.
+# Diataxis quadrants.
 !/docs/reference/
 !/docs/reference/terraform.md
+!/docs/reference/release-gates.md
+!/docs/reference/graph-artifacts.md
+!/docs/reference/graphs/
+!/docs/reference/graphs/minimal.plan.svg
+!/docs/reference/graphs/minimal.summary.json
 
-# Allow how-to guides per org ADR-0002.
 !/docs/how-to/
 !/docs/how-to/use-from-a-packer-template.md
 !/docs/how-to/develop-this-module.md
+!/docs/how-to/generate-terraform-graphs.md
+!/docs/how-to/review-release-evidence.md
 
-# Allow conceptual explainers per org ADR-0002.
 !/docs/explanation/
+!/docs/explanation/architecture.md
 !/docs/explanation/threat-model.md
-
-# Allow cross-quadrant architecture/evidence docs that index the module's proof points.
-!/docs/architecture.md
-!/docs/release-gates.md
-!/docs/testing-strategy.md
+!/docs/explanation/testing-strategy.md
+!/docs/explanation/dependency-graph-validation.md
 
 # ----- [ Runnable examples ] ----------------------------------------------------------------------
 
-# Allow copyable consumer fixtures that prove the module contract in human-readable form.
 !/examples/
 !/examples/minimal/
 !/examples/minimal/README.md
 !/examples/minimal/main.tf
+!/examples/minimal/outputs.tf
+!/examples/minimal/versions.tf
+
 !/examples/packer-consumer/
 !/examples/packer-consumer/README.md
 !/examples/packer-consumer/main.tf
-!/examples/packer-consumer/build.pkr.hcl
+!/examples/packer-consumer/outputs.tf
+!/examples/packer-consumer/example.pkrvars.hcl.tmpl
+
 !/examples/adoption-recovery/
 !/examples/adoption-recovery/README.md
 !/examples/adoption-recovery/main.tf
+
 !/examples/failure-cases/
-!/examples/failure-cases/README.md
+!/examples/failure-cases/dependency-cycle/
+!/examples/failure-cases/dependency-cycle/README.md
+!/examples/failure-cases/dependency-cycle/main.tf
+
+# ----- [ Local CI fixtures ] ----------------------------------------------------------------------
+
+!/tests/
+!/tests/fixtures/
+!/tests/fixtures/minimal/
+!/tests/fixtures/minimal/main.tf
+!/tests/fixtures/minimal/outputs.tf
+!/tests/fixtures/minimal/versions.tf
+!/tests/fixtures/packer-consumer/
+!/tests/fixtures/packer-consumer/main.tf
+!/tests/fixtures/packer-consumer/outputs.tf
+!/tests/fixtures/packer-consumer/versions.tf
+
+# ----- [ Policy as code ] -------------------------------------------------------------------------
+
+!/policies/
+!/policies/opa/
+!/policies/opa/iso_manager.rego
+!/policies/opa/iso_manager_test.rego
+!/policies/exceptions/
+!/policies/exceptions/README.md
+
+# ----- [ Tooling ] --------------------------------------------------------------------------------
+
+!/tools/
+!/tools/check_docs_layout.py
+!/tools/render_graphs.sh
+!/tools/tf_graph_cycles.py
+!/tools/tf_graph_summary.py
+!/tools/generate_release_evidence.sh
+!/tools/install_ci_tools.sh
 
 # ----- [ Release automation ] ---------------------------------------------------------------------
 
-# Allow release-please config so changelog sections and release type stay versioned.
 !/release-please-config.json
-
-# Allow release-please manifest so the current version pin stays versioned.
 !/.release-please-manifest.json
 
 # ----- [ GitHub configuration ] -------------------------------------------------------------------
 
-# Allow the GitHub config root so inherited defaults and repo automation are versioned.
 !/.github/
-
-# Allow code owners so PR review routing stays consistent.
 !/.github/CODEOWNERS
-
-# Allow Renovate config so dependency update behaviour stays versioned.
 !/.github/renovate.json5
-
-# Generic issue and pull request templates are intentionally inherited from
-# nwarila-platform/.github.
-
-# Allow workflow directory so repo CI definitions stay tracked.
 !/.github/workflows/
-
-# Allow CodeQL workflow so static analysis stays versioned.
 !/.github/workflows/codeql.yaml
-
-# Allow PR validation workflow so terraform fmt/init/validate/test gates stay versioned.
-!/.github/workflows/pr-validation.yaml
-
-# Allow release-please workflow so release automation stays versioned.
-!/.github/workflows/release-please.yaml
-
-# Allow repo-ci workflow so actionlint and markdownlint baseline gates stay versioned.
-!/.github/workflows/repo-ci.yml
-
-# Allow security workflow so trivy and gitleaks scans stay versioned.
-!/.github/workflows/security.yaml
-
-# Allow the org-adr-sync caller so mirror integrity is enforced on every PR
-# and refreshed on a weekly schedule (see org ADR-0001).
+!/.github/workflows/graph-regression.yml
 !/.github/workflows/org-adr-sync.yml
+!/.github/workflows/pr-validation.yaml
+!/.github/workflows/release-evidence.yml
+!/.github/workflows/release-please.yaml
+!/.github/workflows/repo-ci.yml
+!/.github/workflows/security.yaml
 
 # ----- [ Terraform module sources and tests ] -----------------------------------------------------
 
-# Allow the terraform module directory so module HCL stays tracked (see repo ADR-0001).
 !/terraform/
-
-# Allow locals so derived values stay versioned.
 !/terraform/locals.tf
-
-# Allow outputs so the module's external contract stays versioned.
 !/terraform/outputs.tf
-
-# Allow resources so the module's managed objects stay versioned.
 !/terraform/resources.tf
-
-# Allow variables so the module's input contract stays versioned.
 !/terraform/variables.tf
-
-# Allow versions so terraform and provider version constraints stay versioned.
 !/terraform/versions.tf
-
-# Intentionally do not allow terraform/.terraform.lock.hcl. This repo is a consumed child
-# module; root consumers own their provider lockfiles, while this module exact-pins provider
-# compatibility in terraform/versions.tf.
-
-# Allow the tests directory so terraform test coverage stays versioned.
 !/terraform/tests/
 !/terraform/tests/validation.tftest.hcl
+
+# Terraform state, raw plan files, provider caches, lockfiles, credentials, and
+# environment-specific tfvars remain ignored by the deny-all default.
