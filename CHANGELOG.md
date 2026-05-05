@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.0.2...v1.1.0) (2026-05-05)
+
+
+### Features
+
+* add release evidence, graph validation, and policy gates ([db09e2b](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/commit/db09e2b3cb6969ae8e66513b3de0fe8f0777b267))
+
+
+### Bug Fixes
+
+* **ci:** satisfy new docs-diff and opa-test gates ([e74178b](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/commit/e74178b2a576172defe689cfa7ea27e1144ebd45))
+
 ## [1.0.2](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/compare/v1.0.1...v1.0.2) (2026-05-05)
 
 
