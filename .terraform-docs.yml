@@ -1,0 +1,32 @@
+formatter: markdown table
+
+output:
+  file: ../docs/reference/terraform.md
+  mode: inject
+  template: |-
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->
+
+sections:
+  show:
+    - resources
+    - inputs
+    - outputs
+
+sort:
+  enabled: true
+  by: name
+
+settings:
+  anchor: false
+  color: false
+  default: true
+  description: true
+  escape: true
+  hide-empty: true
+  html: true
+  required: true
+  sensitive: true
+  type: true
+  url: false

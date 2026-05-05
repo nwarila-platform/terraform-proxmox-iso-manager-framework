@@ -48,6 +48,15 @@ run "valid_inputs_pass_all_validations" {
   }
 }
 
+run "accepts_valid_iso_pin" {
+  command = plan
+
+  assert {
+    condition     = output.iso_url == "https://example.test/foo.iso"
+    error_message = "iso_url should echo back a valid non-tokenized HTTPS URL"
+  }
+}
+
 run "default_safety_flags_fail_closed" {
   command = plan
 
@@ -77,6 +86,15 @@ run "upload_timeout_default_is_safe" {
   assert {
     condition     = proxmox_download_file.iso.upload_timeout == 3600
     error_message = "upload_timeout should default to one hour"
+  }
+}
+
+run "accepts_upload_timeout_default" {
+  command = plan
+
+  assert {
+    condition     = proxmox_download_file.iso.upload_timeout == 3600
+    error_message = "upload_timeout should use the documented default when omitted"
   }
 }
 
@@ -200,11 +218,35 @@ run "rejects_url_with_query_string_token" {
   expect_failures = [var.iso_pin]
 }
 
+run "rejects_url_with_query_string" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https://example.test/foo.iso?mirror=primary"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
 run "rejects_url_with_fragment" {
   command = plan
   variables {
     iso_pin = {
       url      = "https://example.test/foo.iso#sha256"
+      sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
+      filename = "foo.iso"
+    }
+  }
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_url_with_embedded_credentials" {
+  command = plan
+  variables {
+    iso_pin = {
+      url      = "https://user:pass@example.test/foo.iso"
       sha256   = "0000000000000000000000000000000000000000000000000000000000000000"
       filename = "foo.iso"
     }
@@ -326,6 +368,14 @@ run "rejects_node_with_slash" {
   expect_failures = [var.node]
 }
 
+run "rejects_node_with_colon" {
+  command = plan
+  variables {
+    node = "cluster:node"
+  }
+  expect_failures = [var.node]
+}
+
 # ----- storage validation -----
 
 run "rejects_empty_storage" {
@@ -352,6 +402,14 @@ run "rejects_storage_with_slash" {
   expect_failures = [var.storage]
 }
 
+run "rejects_storage_with_colon" {
+  command = plan
+  variables {
+    storage = "pool:iso"
+  }
+  expect_failures = [var.storage]
+}
+
 # ----- upload_timeout validation -----
 
 run "rejects_upload_timeout_below_minimum" {
@@ -362,10 +420,26 @@ run "rejects_upload_timeout_below_minimum" {
   expect_failures = [var.upload_timeout]
 }
 
+run "rejects_upload_timeout_too_low" {
+  command = plan
+  variables {
+    upload_timeout = 1
+  }
+  expect_failures = [var.upload_timeout]
+}
+
 run "rejects_upload_timeout_above_maximum" {
   command = plan
   variables {
     upload_timeout = 86401
+  }
+  expect_failures = [var.upload_timeout]
+}
+
+run "rejects_upload_timeout_too_high" {
+  command = plan
+  variables {
+    upload_timeout = 90000
   }
   expect_failures = [var.upload_timeout]
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="430" viewBox="0 0 780 430" role="img" aria-labelledby="title desc">
+  <title id="title">Terraform plan graph for tests/fixtures/minimal</title>
+  <desc id="desc">Representative dependency graph for the minimal local-source fixture. The graph has seven nodes, six edges, and zero dependency cycles.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#314155"/>
+    </marker>
+    <style>
+      .node { fill: #f8fafc; stroke: #314155; stroke-width: 1.4; }
+      .module { fill: #eef6ff; stroke: #2364aa; }
+      .edge { fill: none; stroke: #314155; stroke-width: 1.3; marker-end: url(#arrow); }
+      .label { fill: #16202a; font-family: Arial, sans-serif; font-size: 14px; }
+      .small { fill: #465565; font-family: Arial, sans-serif; font-size: 12px; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="780" height="430" fill="#ffffff"/>
+  <text x="30" y="34" class="label">tests/fixtures/minimal - Terraform plan graph</text>
+  <text x="30" y="56" class="small">Generated from: terraform graph -type=plan -draw-cycles</text>
+
+  <rect class="node" x="42" y="156" width="170" height="54" rx="6"/>
+  <text class="label" x="64" y="188">var.proxmox_endpoint</text>
+
+  <rect class="node" x="42" y="246" width="170" height="54" rx="6"/>
+  <text class="label" x="86" y="278">provider.proxmox</text>
+
+  <rect class="node module" x="284" y="82" width="210" height="54" rx="6"/>
+  <text class="label" x="331" y="114">module.iso inputs</text>
+
+  <rect class="node module" x="284" y="180" width="210" height="54" rx="6"/>
+  <text class="label" x="316" y="212">proxmox_download_file.iso</text>
+
+  <rect class="node module" x="284" y="278" width="210" height="54" rx="6"/>
+  <text class="label" x="344" y="310">local.iso_path</text>
+
+  <rect class="node" x="566" y="170" width="170" height="54" rx="6"/>
+  <text class="label" x="616" y="202">output.iso_file</text>
+
+  <rect class="node" x="566" y="270" width="170" height="54" rx="6"/>
+  <text class="label" x="598" y="302">output.iso_checksum</text>
+
+  <path class="edge" d="M 212 183 C 244 183 250 109 284 109"/>
+  <path class="edge" d="M 212 273 C 248 273 248 207 284 207"/>
+  <path class="edge" d="M 389 136 L 389 180"/>
+  <path class="edge" d="M 389 234 L 389 278"/>
+  <path class="edge" d="M 494 305 C 530 305 530 297 566 297"/>
+  <path class="edge" d="M 494 207 C 530 207 530 197 566 197"/>
+
+  <text x="30" y="392" class="small">Cycle count: 0</text>
+</svg>
