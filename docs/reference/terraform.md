@@ -1,76 +1,59 @@
-# Module Reference
+# Terraform Reference
 
-> Hand-maintained until `terraform-docs` is wired into pre-commit. Once wired,
-> this file will be auto-generated from the HCL in [`../../terraform/`](../../terraform/);
-> hand edits will be overwritten on the next generation.
+This file is partially generated from [`../../terraform/`](../../terraform/) by
+`terraform-docs`. Manual notes stay outside the markers; generated provider, resource,
+input, and output tables stay inside the markers.
 
-## Requirements
+## Security Notes
 
-| Requirement                         | Version    |
-|-------------------------------------|------------|
-| Terraform                           | `= 1.15.1` |
-| `bpg/proxmox` provider              | `= 0.105.0` |
+The module intentionally rejects tokenized, presigned, or credential-bearing ISO URLs.
+Query strings, fragments, whitespace, non-HTTPS schemes, missing hosts, missing paths, and
+embedded credentials are rejected before planning. Terraform state, plans, logs, and
+outputs are not safe places for bearer tokens.
 
-Both are exact-pinned per
-[org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md).
-Consumers MUST run Terraform 1.15.1 exactly; `terraform init` fails on any other version.
+`iso_url` is kept as an output only because the URL contract rejects those common
+secret-bearing shapes. Consumers must still avoid putting secrets in path segments.
+
+## Version Pins
+
+Exact Terraform and provider pins live in [`../../terraform/versions.tf`](../../terraform/versions.tf).
+The generated tables below intentionally avoid duplicating those version numbers.
+
+<!-- BEGIN_TF_DOCS -->
+## Resources
+
+| Name | Type |
+|------|------|
+| proxmox_download_file.iso | resource |
 
 ## Inputs
 
-| Name        | Type                                       | Default      | Description |
-|-------------|--------------------------------------------|--------------|-------------|
-| `family`    | `string`                                   | required     | Template family discriminator (e.g. `rocky9`). **Provenance-only** — echoed back through the `family` output, not consumed by any resource. Must match `[a-z0-9._-]+`. |
-| `iso_pin`   | `object({ url, sha256, filename })`        | required     | The ISO to manage. `url` must be a non-tokenized HTTPS URL with host and path; query strings, fragments, and whitespace are rejected. `sha256` must be a 64-char lowercase hex digest; `filename` must end in `.iso` and contain no path components or whitespace. |
-| `node`      | `string`                                   | required     | Proxmox node name on which the download is performed. Must match `[A-Za-z0-9._-]+`. |
-| `storage`   | `string`                                   | required     | Proxmox storage datastore (e.g. `cephFS`, `local`). Must have ISO content type enabled and match `[A-Za-z0-9._-]+`. |
-| `upload_timeout` | `number`                            | `3600`       | Timeout in seconds for the Proxmox download-url operation. Must be between 60 and 86400. |
-| `overwrite` | `bool`                                     | `false`      | When true, allow provider-managed replacement when the managed file size changes. Leave false for pinned ISO inputs. |
-| `overwrite_unmanaged` | `bool`                           | `false`      | When true, delete and replace a same-named unmanaged file during deliberate adoption/recovery. |
-
-### Validation rules
-
-Every string/object input with constrained syntax has validation coverage (see
-[`../../terraform/variables.tf`](../../terraform/variables.tf) and the test coverage in
-[`../../terraform/tests/validation.tftest.hcl`](../../terraform/tests/validation.tftest.hcl)).
-The boolean safety flags are type-constrained and covered by default-value assertions:
-
-- `family`: lowercase letters, digits, hyphens, dots, underscores only.
-- `iso_pin.url`: non-tokenized HTTPS URL with host and path; query strings, fragments,
-  whitespace, `http://`, `ftp://`, and `file://` are rejected.
-- `iso_pin.sha256`: exactly 64 lowercase hex characters.
-- `iso_pin.filename`: a simple filename ending in `.iso`, no path traversal, no whitespace.
-- `node`: letters, digits, hyphens, dots, and underscores only.
-- `storage`: letters, digits, hyphens, dots, and underscores only.
-- `upload_timeout`: between 60 and 86400 seconds.
-
-Validation runs at `terraform plan` time, before any provider initialisation.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| family | Template family discriminator (e.g. "rocky9", "ubuntu24"). Provenance-only: this<br/>value is NOT consumed by any resource in this module - it is echoed back through the<br/>`family` output so consumers (typically Packer template repos) can correlate the<br/>managed ISO with the template family it feeds. Must match Proxmox tag character<br/>constraints (lowercase letters, digits, hyphens, dots, underscores) so consumers can<br/>pass it directly into Proxmox tags downstream. | `string` | n/a | yes |
+| iso_pin | Pin specifying the exact ISO this module will manage on Proxmox storage. The url is a<br/>non-tokenized HTTPS URL with a host and path, and it may not contain whitespace, query<br/>strings, fragments, or embedded credentials. The url is fetched once on first apply (or<br/>when sha256 changes); the sha256 is enforced server-side by the Proxmox download<br/>endpoint after the file lands. The filename is the on-disk name in the target storage's<br/>iso/ directory.<br/><br/>The consumer's git repository is the long-lived audit trail for this pin: replacing the<br/>pin in the consumer's HCL records the ISO change in git history with full diffability. | <pre>object({<br/>    url      = string<br/>    sha256   = string<br/>    filename = string<br/>  })</pre> | n/a | yes |
+| node | Proxmox node name on which the download is performed. Required by the bpg/proxmox<br/>provider's proxmox_download_file resource. For shared/cluster<br/>storage like cephFS, any node works because the resulting file is cluster-visible; pick<br/>one consistently to keep the download localized. | `string` | n/a | yes |
+| overwrite | When true, allow the provider to replace the managed file when its size changes outside<br/>Terraform or the upstream URL reports a different size. Defaults to false for pinned ISO<br/>inputs: once Terraform owns the file, the provider does not re-check upstream size on<br/>refresh. This does not take ownership of unmanaged pre-existing files; use<br/>overwrite_unmanaged for that explicit recovery path. | `bool` | `false` | no |
+| overwrite_unmanaged | When true, delete and replace an unmanaged file that already exists at the target<br/>Proxmox storage path. Defaults to false so the module fails closed if a same-named ISO<br/>exists outside Terraform state. Set true only during deliberate adoption/recovery. | `bool` | `false` | no |
+| storage | Proxmox storage datastore where the ISO will be placed (e.g. "cephFS", "local"). The<br/>storage MUST have ISO content type enabled in its Proxmox configuration. | `string` | n/a | yes |
+| upload_timeout | Timeout in seconds for the Proxmox download-url operation. Defaults to one hour so<br/>large installer ISOs can be fetched reliably on homelab or WAN-backed storage without<br/>weakening transport verification. | `number` | `3600` | no |
 
 ## Outputs
 
-| Name           | Type     | Description |
-|----------------|----------|-------------|
-| `iso_id`       | `string` | Proxmox file ID `<datastore>:<volume_id>`. The canonical identifier the bpg/proxmox provider uses to reference the file. |
-| `iso_path`     | `string` | `<storage>:iso/<filename>`. Pass directly into Packer's `iso_file` field. |
-| `iso_sha256`   | `string` | SHA-256 digest of the managed ISO. Echoed back from input for provenance. |
-| `iso_url`      | `string` | Non-tokenized upstream URL the ISO was downloaded from. Echoed back for provenance. |
-| `iso_filename` | `string` | On-disk filename of the managed ISO. Echoed back. |
-| `family`       | `string` | Template family discriminator. Echoed back. |
-| `node`         | `string` | Proxmox node where the download was performed. |
-| `storage`      | `string` | Proxmox storage datastore the ISO landed on. |
+| Name | Description |
+|------|-------------|
+| family | Template family discriminator, echoed back for downstream label/output use. |
+| iso_filename | On-disk filename of the managed ISO. Echoed back for downstream pathing. |
+| iso_id | Proxmox file ID for the managed ISO, in the form "<datastore>:<volume_id>". This is the<br/>canonical identifier the bpg/proxmox provider uses to reference the file in subsequent<br/>resources. |
+| iso_path | Storage-prefixed path consumable by Packer's proxmox-iso plugin `iso_file` field, e.g.<br/>"cephFS:iso/Rocky-9.6-x86_64-dvd.iso". Pass this directly into the consumer template<br/>repo's Packer configuration. |
+| iso_sha256 | SHA-256 digest of the managed ISO, echoed back from input. Useful for downstream<br/>consumers (e.g. SLSA provenance generators, audit log emitters) that want to record<br/>which exact ISO a build consumed. |
+| iso_url | Non-tokenized upstream URL the ISO was downloaded from. Echoed back for provenance recording. |
+| node | Proxmox node where the download was performed. |
+| storage | Proxmox storage datastore the ISO landed on. |
+<!-- END_TF_DOCS -->
 
-## Resources
+## Validation Notes
 
-| Type                    | Name | Provider          |
-|-------------------------|------|-------------------|
-| `proxmox_download_file` | `iso` | `bpg/proxmox`    |
-
-The single resource is created with `for_each = {}` semantics implicit in a one-shot child module: each `module "iso"` instantiation yields exactly one `proxmox_download_file.iso` resource.
-
-The resource always sets `verify = true`, `checksum_algorithm = "sha256"`, and
-`upload_timeout = var.upload_timeout`.
-
-## Local values
-
-The module declares one local value:
-
-- `iso_path = "${var.storage}:iso/${var.iso_pin.filename}"` — assembled in [`../../terraform/locals.tf`](../../terraform/locals.tf) so [`outputs.tf`](../../terraform/outputs.tf) stays declaration-only.
+Every constrained input has Terraform test coverage in
+[`../../terraform/tests/validation.tftest.hcl`](../../terraform/tests/validation.tftest.hcl).
+Validation runs at plan time before provider operations.

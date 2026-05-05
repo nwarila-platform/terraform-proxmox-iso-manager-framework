@@ -1,35 +1,7 @@
-terraform {
-  required_version = "= 1.15.1"
+# Start from ../minimal/main.tf and add the argument below to module "iso" only during
+# deliberate adoption or recovery.
+#
+# The default false value stops Terraform if a same-name ISO exists outside state.
+# Set true only after an operator confirms the unmanaged ISO should be replaced.
 
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "= 0.105.0"
-    }
-  }
-}
-
-provider "proxmox" {
-  endpoint = var.proxmox_endpoint
-}
-
-variable "proxmox_endpoint" {
-  description = "Proxmox API endpoint. Credentials should be supplied through provider-supported environment variables or caller-specific configuration."
-  type        = string
-  default     = "https://proxmox.example.test:8006/"
-}
-
-module "iso" {
-  source = "../../terraform"
-
-  family = "rocky9"
-  iso_pin = {
-    url      = "https://dl.rockylinux.org/pub/rocky/9.6/isos/x86_64/Rocky-9.6-x86_64-dvd.iso"
-    sha256   = "8ff2a47e2f3bfe442617fceb7ef289b7b1d2d0502089dbbd505d5368b2b3a90f"
-    filename = "Rocky-9.6-x86_64-dvd.iso"
-  }
-  node    = "pve-node-01"
-  storage = "cephFS"
-
-  overwrite_unmanaged = true
-}
+# overwrite_unmanaged = true
