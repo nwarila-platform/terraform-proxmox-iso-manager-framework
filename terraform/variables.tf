@@ -77,10 +77,21 @@ variable "storage" {
 
 variable "overwrite" {
   description = <<-EOT
-    When true, replace any pre-existing file at the target path even if a SHA mismatch is
-    NOT detected. Defaults to false: the typical desired behavior is "never re-download
-    something that's already there." Set to true only when forcing a re-pull, e.g. recovering
-    from a corrupted file the SHA pre-check missed.
+    When true, allow the provider to replace the managed file when its size changes outside
+    Terraform or the upstream URL reports a different size. Defaults to false for pinned ISO
+    inputs: once Terraform owns the file, the provider does not re-check upstream size on
+    refresh. This does not take ownership of unmanaged pre-existing files; use
+    overwrite_unmanaged for that explicit recovery path.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "overwrite_unmanaged" {
+  description = <<-EOT
+    When true, delete and replace an unmanaged file that already exists at the target
+    Proxmox storage path. Defaults to false so the module fails closed if a same-named ISO
+    exists outside Terraform state. Set true only during deliberate adoption/recovery.
   EOT
   type        = bool
   default     = false
