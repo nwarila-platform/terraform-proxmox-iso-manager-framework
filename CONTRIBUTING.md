@@ -6,7 +6,7 @@ This is a single-module repository. Module HCL lives under `terraform/` so the r
 stays focused on governance, docs, and tooling. Consumers import the module via the git
 double-slash path syntax — see `README.md` for the canonical `source =` form.
 
-```
+```text
 .
 ├── terraform/
 │   ├── locals.tf

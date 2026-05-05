@@ -13,7 +13,7 @@ the ISO their build consumes.
 
 ## Mental Model
 
-```
+```text
                     git: iso/<family>.pin.hcl                Proxmox VE
               (the long-lived audit trail)                  (cluster state)
                                                                   ▲
