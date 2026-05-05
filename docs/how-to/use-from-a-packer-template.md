@@ -10,7 +10,7 @@ and SHA-verify a single ISO; the calling Terraform configuration emits a Packer
 - A Proxmox VE cluster reachable via the bpg/proxmox provider.
 - A storage datastore on Proxmox with ISO content type enabled (e.g. `cephFS`, `local`).
 - A Proxmox API token with the privileges required by `proxmox_download_file`.
-- Terraform `= 1.9.8` exactly. Use `tfenv` or `asdf` if you manage multiple versions
+- Terraform `= 1.15.1` exactly. Use `tfenv` or `asdf` if you manage multiple versions
   on one workstation. Per [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md),
   any other Terraform version causes `terraform init` to fail.
 
@@ -20,11 +20,11 @@ In your Packer template repo's Terraform code:
 
 ```hcl
 terraform {
-  required_version = "= 1.9.8"
+  required_version = "= 1.15.1"
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "= 0.98.1"
+      version = "= 0.105.0"
     }
   }
 }
@@ -101,7 +101,7 @@ When upstream releases a new ISO version:
 When this module ships a new version:
 
 1. Update `?ref=v1.0.0` to the new tag in your `module "iso"` block.
-2. Update `required_version = "= 1.9.8"` and `version = "= 0.98.1"` if the new module
+2. Update `required_version = "= 1.15.1"` and `version = "= 0.105.0"` if the new module
    version pins different versions. The new module's README documents the required
    versions.
 3. Run `terraform init -upgrade` and `terraform plan`; review the diff.
@@ -109,8 +109,8 @@ When this module ships a new version:
 
 ## Troubleshooting
 
-- **`terraform init` fails with "required Terraform version is = 1.9.8"**: install
-  Terraform 1.9.8 exactly. This is intentional — see
+- **`terraform init` fails with "required Terraform version is = 1.15.1"**: install
+  Terraform 1.15.1 exactly. This is intentional — see
   [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md).
 - **`proxmox_download_file` fails with checksum mismatch**: the SHA in `iso_pin` does
   not match the upstream file. Either upstream changed the file (in which case re-fetch

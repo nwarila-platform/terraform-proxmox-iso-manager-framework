@@ -11,6 +11,13 @@ This directory follows the [Diátaxis](https://diataxis.fr) documentation framew
 | [how-to/](how-to/)             | Step-by-step guides for goal-directed tasks       | "How do I use this from a Packer template?" |
 | [explanation/](explanation/)   | Conceptual background and rationale               | "What's the threat model?" |
 
+## Local Development
+
+Repository-specific contributor notes live in
+[`how-to/develop-this-module.md`](how-to/develop-this-module.md). Generic contribution,
+support, security, issue-template, and pull-request-template files are inherited from
+`nwarila-platform/.github`.
+
 This module does not currently ship learning-oriented `tutorials/`. Consumers of a
 single-purpose Terraform module typically read reference + how-to material rather
 than following a structured tutorial.

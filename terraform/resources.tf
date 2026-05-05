@@ -12,5 +12,6 @@ resource "proxmox_download_file" "iso" {
   checksum_algorithm = "sha256"
 
   /* Optional Parameters */
-  overwrite = var.overwrite
+  overwrite           = var.overwrite
+  overwrite_unmanaged = var.overwrite_unmanaged
 }
