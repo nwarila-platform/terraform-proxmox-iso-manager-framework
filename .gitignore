@@ -1,0 +1,31 @@
+# Terraform-specific local artifacts -- never committed.
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+*.tfvars
+!example.tfvars
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Plan / apply outputs
+*.tfplan
+*.plan
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*.bak
+*.swp
+*.swo
+*~
+
+# Python (CI helpers)
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/

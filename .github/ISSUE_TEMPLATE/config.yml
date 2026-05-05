@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Support & Questions
+    url: https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/blob/main/README.md
+    about: Read the README before opening an issue.
+  - name: Security Vulnerability
+    url: https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/blob/main/SECURITY.md
+    about: Do not open a public issue for security vulnerabilities. Follow the security policy instead.
