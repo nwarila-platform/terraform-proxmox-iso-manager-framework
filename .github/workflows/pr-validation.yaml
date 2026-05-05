@@ -4,17 +4,25 @@ on:
   push:
     branches: [main]
     paths:
-      - 'terraform/**'
-      - 'examples/**'
-      - '.github/workflows/pr-validation.yaml'
-      - '.editorconfig'
+      - "terraform/**"
+      - "tests/**"
+      - "tools/**"
+      - "docs/**"
+      - "policies/**"
+      - "Makefile"
+      - ".github/workflows/pr-validation.yaml"
+      - ".editorconfig"
   pull_request:
     branches: [main]
     paths:
-      - 'terraform/**'
-      - 'examples/**'
-      - '.github/workflows/pr-validation.yaml'
-      - '.editorconfig'
+      - "terraform/**"
+      - "tests/**"
+      - "tools/**"
+      - "docs/**"
+      - "policies/**"
+      - "Makefile"
+      - ".github/workflows/pr-validation.yaml"
+      - ".editorconfig"
   merge_group:
   workflow_dispatch:
 
@@ -27,13 +35,12 @@ concurrency:
 
 jobs:
   terraform:
-    name: Terraform fmt + validate
+    name: Terraform contract
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
       run:
         shell: bash
-        working-directory: terraform
 
     steps:
       - name: Check out repository
@@ -49,54 +56,15 @@ jobs:
           terraform_version: "1.15.1"
           terraform_wrapper: false
 
-      - name: Run terraform fmt (recursive check)
-        run: |
-          set -euo pipefail
-          terraform fmt -check -recursive .
+      - name: Install ci tools (tflint, terraform-docs, opa)
+        env:
+          # renovate: datasource=github-releases depName=terraform-linters/tflint extractVersion=^v(?<version>.*)$
+          TFLINT_VERSION: "0.59.1"
+          # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.*)$
+          TERRAFORM_DOCS_VERSION: "0.20.0"
+          # renovate: datasource=github-releases depName=open-policy-agent/opa extractVersion=^v(?<version>.*)$
+          OPA_VERSION: "1.10.0"
+        run: bash tools/install_ci_tools.sh
 
-      - name: Run terraform init + validate
-        run: |
-          set -euo pipefail
-          terraform init -backend=false
-          terraform validate
-
-      - name: Run terraform test (variable validation coverage)
-        run: |
-          set -euo pipefail
-          terraform test
-
-  examples:
-    name: Terraform examples validate (${{ matrix.example }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        example:
-          - examples/minimal
-          - examples/packer-consumer
-          - examples/adoption-recovery
-    defaults:
-      run:
-        shell: bash
-        working-directory: ${{ matrix.example }}
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 1
-          persist-credentials: false
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
-        with:
-          # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
-          terraform_version: "1.15.1"
-          terraform_wrapper: false
-
-      - name: Run terraform init + validate
-        run: |
-          set -euo pipefail
-          terraform init -backend=false
-          terraform validate
+      - name: Run local CI gates
+        run: make ci
