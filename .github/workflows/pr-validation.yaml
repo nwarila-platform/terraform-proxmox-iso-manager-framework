@@ -50,3 +50,8 @@ jobs:
           set -euo pipefail
           terraform init -backend=false
           terraform validate
+
+      - name: Run terraform test (variable validation coverage)
+        run: |
+          set -euo pipefail
+          terraform test
