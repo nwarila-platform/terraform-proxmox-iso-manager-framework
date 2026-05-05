@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+*.tf       text eol=lf
+*.tfvars   text eol=lf
+*.hcl      text eol=lf
+*.md       text eol=lf
+*.sh       text eol=lf
+*.yaml     text eol=lf
+*.yml      text eol=lf
+*.json     text eol=lf
+
+.github/         export-ignore
+.gitignore       export-ignore
+.gitattributes   export-ignore
+.editorconfig    export-ignore
+CHANGELOG.md     export-ignore
+CONTRIBUTING.md  export-ignore
+SECURITY.md     export-ignore
+SUPPORT.md       export-ignore
