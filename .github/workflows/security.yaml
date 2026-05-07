@@ -18,4 +18,8 @@ concurrency:
 
 jobs:
   scan:
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     uses: NWarila/terraform-template/.github/workflows/reusable-iac-security.yaml@7fdf7bc711e4e5973e3308fc988df1762ad57daf
