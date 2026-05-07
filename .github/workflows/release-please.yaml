@@ -33,4 +33,11 @@ jobs:
         if: ${{ steps.release.outputs.release_created == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run release-evidence.yml --ref "${{ steps.release.outputs.tag_name }}" --repo "${{ github.repository }}"
+          # Pass workflow expansions through env vars to avoid template
+          # injection (zizmor template-injection finding). Values are
+          # producer-controlled (release-please outputs / GitHub context),
+          # but routing them via env preserves the principle and silences
+          # the audit cleanly.
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run release-evidence.yml --ref "$TAG_NAME" --repo "$REPOSITORY"
