@@ -22,3 +22,23 @@ validated and what would have blocked publication.
 Release Please publishes release notes and tags after qualifying merges to `main`. The
 release evidence workflow runs on published releases, tag pushes matching `v*`, and manual
 dispatch.
+
+## Workflow Control Plane
+
+| Workflow | Trigger | Purpose | Permission baseline |
+| --- | --- | --- | --- |
+| `pr-validation.yaml` | PR, push to `main`, merge queue, manual | Terraform, docs, lint, and OPA gates via `make ci` | `contents: read` |
+| `repo-ci.yml` | PR, push to `main` | Markdown and workflow linting | `contents: read` |
+| `security.yaml` | PR, push to `main`, merge queue, weekly, manual | Trivy and Gitleaks scans | Job-specific read plus SARIF upload |
+| `codeql.yaml` | PR, push to `main`, merge queue, weekly, manual | Static analysis for GitHub Actions | `contents: read`, `security-events: write`, `actions: read` |
+| `graph-regression.yml` | PR, manual | Terraform graph evidence and cycle detection | `contents: read` |
+| `org-adr-sync.yml` | PR touching org ADRs, weekly, manual | Verify mirrored org ADRs | `contents: read` |
+| `release-please.yaml` | Push to `main` | Release PRs and GitHub releases | Write permissions required for release automation |
+| `release-evidence.yml` | Published release, tag push, manual | Release evidence artifact | `contents: read` |
+
+## Artifact Rules
+
+Release evidence and workflow artifacts must not include Terraform state, raw plan files,
+`.terraform/`, `tfvars`, provider caches, credentials, tokens, signed URLs, or private
+infrastructure values. The `tools/generate_release_evidence.sh` script enforces these
+exclusions; reviewers should sample uploaded artifacts before publication.

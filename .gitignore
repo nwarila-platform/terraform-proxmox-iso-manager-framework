@@ -18,8 +18,8 @@
 !/README.md
 !/CHANGELOG.md
 !/LICENSE
-
-# Generic community-health files are inherited from nwarila-platform/.github.
+!/CONTRIBUTING.md
+!/SECURITY.md
 
 # ----- [ Documentation ] --------------------------------------------------------------------------
 
@@ -44,6 +44,8 @@
 !/docs/reference/
 !/docs/reference/terraform.md
 !/docs/reference/release-gates.md
+!/docs/reference/invariants.md
+!/docs/reference/golden-template-contract.md
 !/docs/reference/graph-artifacts.md
 !/docs/reference/graphs/
 !/docs/reference/graphs/minimal.plan.svg
@@ -52,6 +54,7 @@
 !/docs/how-to/
 !/docs/how-to/use-from-a-packer-template.md
 !/docs/how-to/develop-this-module.md
+!/docs/how-to/adopt-this-template.md
 !/docs/how-to/generate-terraform-graphs.md
 !/docs/how-to/review-release-evidence.md
 
@@ -115,7 +118,6 @@
 !/tools/tf_graph_cycles.py
 !/tools/tf_graph_summary.py
 !/tools/generate_release_evidence.sh
-!/tools/install_ci_tools.sh
 
 # ----- [ Release automation ] ---------------------------------------------------------------------
 
@@ -126,6 +128,7 @@
 
 !/.github/
 !/.github/CODEOWNERS
+!/.github/PULL_REQUEST_TEMPLATE.md
 !/.github/renovate.json5
 !/.github/workflows/
 !/.github/workflows/codeql.yaml
@@ -136,6 +139,7 @@
 !/.github/workflows/release-please.yaml
 !/.github/workflows/repo-ci.yml
 !/.github/workflows/security.yaml
+!/.github/workflows/template-sync.yaml
 
 # ----- [ Terraform module sources and tests ] -----------------------------------------------------
 

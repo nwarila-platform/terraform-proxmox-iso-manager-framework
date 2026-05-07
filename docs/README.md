@@ -8,8 +8,8 @@ This directory follows the [Diataxis](https://diataxis.fr) documentation framewo
 | Quadrant | Documents | When to read |
 |---|---|---|
 | Tutorials | None currently shipped | This single-purpose module does not currently need a learning path. |
-| How-to | [Develop this module](how-to/develop-this-module.md), [Use from a Packer template](how-to/use-from-a-packer-template.md), [Generate Terraform graphs](how-to/generate-terraform-graphs.md), [Review release evidence](how-to/review-release-evidence.md) | You have a specific task to complete. |
-| Reference | [Terraform reference](reference/terraform.md), [Release gates](reference/release-gates.md), [Graph artifacts](reference/graph-artifacts.md) | You need exact facts, schemas, gates, inputs, or outputs. |
+| How-to | [Develop this module](how-to/develop-this-module.md), [Use from a Packer template](how-to/use-from-a-packer-template.md), [Generate Terraform graphs](how-to/generate-terraform-graphs.md), [Review release evidence](how-to/review-release-evidence.md), [Adopt this template](how-to/adopt-this-template.md) | You have a specific task to complete. |
+| Reference | [Terraform reference](reference/terraform.md), [Release gates](reference/release-gates.md), [Graph artifacts](reference/graph-artifacts.md), [Module invariants](reference/invariants.md), [Golden template contract](reference/golden-template-contract.md) | You need exact facts, schemas, gates, inputs, or outputs. |
 | Explanation | [Architecture](explanation/architecture.md), [Threat model](explanation/threat-model.md), [Testing strategy](explanation/testing-strategy.md), [Dependency graph validation](explanation/dependency-graph-validation.md) | You want rationale, boundaries, or design context. |
 
 Tutorials are not currently shipped. Consumers of a narrow Terraform child module
@@ -25,7 +25,8 @@ not Diataxis quadrant documents.
 
 ## Local Development
 
+Repository-specific contribution, security, pull-request-template, and ownership files
+live in this repository. Organization-wide defaults may still be inherited from
+`nwarila-platform/.github` where GitHub supports inherited community-health files.
 Repository-specific contributor notes live in
-[`how-to/develop-this-module.md`](how-to/develop-this-module.md). Generic contribution,
-support, security, issue-template, and pull-request-template files are inherited from
-`nwarila-platform/.github`.
+[`how-to/develop-this-module.md`](how-to/develop-this-module.md).

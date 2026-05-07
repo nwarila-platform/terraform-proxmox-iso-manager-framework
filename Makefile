@@ -19,11 +19,11 @@ test:
 
 # Mutating: regenerates the injected block in docs/reference/terraform.md.
 docs:
-	terraform-docs markdown table --output-file ../docs/reference/terraform.md --output-mode inject terraform
+	terraform-docs --config .terraform-docs.yml terraform
 
 # Non-mutating: fails if docs/reference/terraform.md is out of sync with terraform/.
 docs-diff:
-	terraform-docs markdown table --output-file ../docs/reference/terraform.md --output-mode inject --output-check terraform
+	terraform-docs --config .terraform-docs.yml --output-check terraform
 
 graph:
 	bash tools/render_graphs.sh

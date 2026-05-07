@@ -98,6 +98,48 @@ run "accepts_upload_timeout_default" {
   }
 }
 
+# ----- null required input validation -----
+
+run "rejects_null_family" {
+  command = plan
+
+  variables {
+    family = null
+  }
+
+  expect_failures = [var.family]
+}
+
+run "rejects_null_iso_pin" {
+  command = plan
+
+  variables {
+    iso_pin = null
+  }
+
+  expect_failures = [var.iso_pin]
+}
+
+run "rejects_null_node" {
+  command = plan
+
+  variables {
+    node = null
+  }
+
+  expect_failures = [var.node]
+}
+
+run "rejects_null_storage" {
+  command = plan
+
+  variables {
+    storage = null
+  }
+
+  expect_failures = [var.storage]
+}
+
 # ----- family validation -----
 
 run "rejects_uppercase_family" {
