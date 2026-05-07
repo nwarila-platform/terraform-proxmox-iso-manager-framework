@@ -10,36 +10,16 @@ on:
     - cron: "30 6 * * 0"
   workflow_dispatch:
 
+permissions: {}
+
 concurrency:
   group: codeql-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  security-events: write
-  actions: read
-
 jobs:
   analyze:
-    name: CodeQL (${{ matrix.language }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [actions]
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
-        with:
-          languages: ${{ matrix.language }}
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: NWarila/terraform-template/.github/workflows/reusable-codeql.yaml@2f343e5c4bc7f069f27628dfe0b597eb96f34b05
