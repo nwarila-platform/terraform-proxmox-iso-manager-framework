@@ -15,6 +15,6 @@ concurrency:
 
 jobs:
   sync:
-    uses: NWarila/terraform-template/.github/workflows/reusable-template-sync.yaml@aeb3d18f0b42c78c6970b48685d758cb235a36c4
+    uses: NWarila/terraform-template/.github/workflows/reusable-template-sync.yaml@75cb84ef019ad43363232708f499aebd6a05934c
     with:
-      template_ref: aeb3d18f0b42c78c6970b48685d758cb235a36c4
+      template_ref: 75cb84ef019ad43363232708f499aebd6a05934c
