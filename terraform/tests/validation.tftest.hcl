@@ -98,47 +98,12 @@ run "accepts_upload_timeout_default" {
   }
 }
 
-# ----- null required input validation -----
-
-run "rejects_null_family" {
-  command = plan
-
-  variables {
-    family = null
-  }
-
-  expect_failures = [var.family]
-}
-
-run "rejects_null_iso_pin" {
-  command = plan
-
-  variables {
-    iso_pin = null
-  }
-
-  expect_failures = [var.iso_pin]
-}
-
-run "rejects_null_node" {
-  command = plan
-
-  variables {
-    node = null
-  }
-
-  expect_failures = [var.node]
-}
-
-run "rejects_null_storage" {
-  command = plan
-
-  variables {
-    storage = null
-  }
-
-  expect_failures = [var.storage]
-}
+# Null rejection for required inputs is enforced by `nullable = false` on each
+# variable definition. Terraform reports those failures at variable-typing time,
+# before any `validation` block runs, so they cannot be exercised with
+# `expect_failures` (which only matches validation/precondition/postcondition
+# failures). The `nullable = false` declarations in terraform/variables.tf are
+# the test-of-record for this behavior.
 
 # ----- family validation -----
 
