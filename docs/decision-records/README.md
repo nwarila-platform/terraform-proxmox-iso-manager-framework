@@ -33,6 +33,7 @@ Do not edit these files directly; changes must land at the master location in
 | [0001](repo/0001-terraform-subdirectory-layout.md)             | Place Module HCL in a `terraform/` Subdirectory                    | Accepted | 2026-05-05 |
 | [0002](repo/0002-use-repo-local-renovate-baseline.md)          | Use a Repo-Local Renovate Baseline Until Org Preset Exists         | Accepted | 2026-05-05 |
 | [0003](repo/0003-allow-example-local-readmes.md)               | Allow Short Example-Local READMEs                                  | Accepted | 2026-05-05 |
+| [0004](repo/0004-consume-terraform-template.md)                | Consume nwarila/terraform-template as Golden Standard              | Accepted | 2026-05-07 |
 
 ## How to Contribute a New ADR
 

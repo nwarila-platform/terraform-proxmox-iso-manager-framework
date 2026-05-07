@@ -8,6 +8,7 @@ variable "family" {
     pass it directly into Proxmox tags downstream.
   EOT
   type        = string
+  nullable    = false
 
   validation {
     condition     = can(regex("^[a-z0-9._-]+$", var.family))
@@ -32,6 +33,7 @@ variable "iso_pin" {
     sha256   = string
     filename = string
   })
+  nullable = false
 
   validation {
     # HTTPS with authority + path only. The authority pattern intentionally excludes "@",
@@ -59,6 +61,7 @@ variable "node" {
     one consistently to keep the download localized.
   EOT
   type        = string
+  nullable    = false
 
   validation {
     condition     = can(regex("^[A-Za-z0-9._-]+$", var.node))
@@ -72,6 +75,7 @@ variable "storage" {
     storage MUST have ISO content type enabled in its Proxmox configuration.
   EOT
   type        = string
+  nullable    = false
 
   validation {
     condition     = can(regex("^[A-Za-z0-9._-]+$", var.storage))
@@ -87,6 +91,7 @@ variable "upload_timeout" {
   EOT
   type        = number
   default     = 3600
+  nullable    = false
 
   validation {
     condition     = var.upload_timeout >= 60 && var.upload_timeout <= 86400
@@ -104,6 +109,7 @@ variable "overwrite" {
   EOT
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "overwrite_unmanaged" {
@@ -114,4 +120,5 @@ variable "overwrite_unmanaged" {
   EOT
   type        = bool
   default     = false
+  nullable    = false
 }

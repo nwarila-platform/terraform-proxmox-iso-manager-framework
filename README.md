@@ -22,30 +22,17 @@ This repository treats a small Terraform child module like a production platform
 component:
 
 - exact Terraform and provider pinning
+- typed inputs with validation coverage
+- mock-based Terraform tests with no live Proxmox dependency
 - SHA-verified ISO lifecycle management
 - fail-closed unmanaged-file behavior
-- mock-based Terraform tests
-- explicit threat model
+- explicit threat model and module invariants
 - Diataxis documentation structure
 - ADR-backed design decisions
-- dependency graph generation
-- dependency cycle detection
+- Terraform graph generation and dependency-cycle detection
+- OPA policy tests as part of `make ci`
 - CI security scanning
 - release evidence artifacts
-
-## Evidence
-
-| Evidence | Location |
-|---|---|
-| Architecture | [docs/explanation/architecture.md](docs/explanation/architecture.md) |
-| Threat model | [docs/explanation/threat-model.md](docs/explanation/threat-model.md) |
-| Terraform reference | [docs/reference/terraform.md](docs/reference/terraform.md) |
-| Testing strategy | [docs/explanation/testing-strategy.md](docs/explanation/testing-strategy.md) |
-| Release gates | [docs/reference/release-gates.md](docs/reference/release-gates.md) |
-| Dependency graph validation | [docs/explanation/dependency-graph-validation.md](docs/explanation/dependency-graph-validation.md) |
-| Graph artifacts | [docs/reference/graph-artifacts.md](docs/reference/graph-artifacts.md) |
-| Runnable examples | [examples/](examples/) |
-| CI workflows | [.github/workflows/](.github/workflows/) |
 
 ## Usage
 
@@ -86,32 +73,73 @@ state and outputs are not safe places for bearer tokens.
 
 ## Examples
 
-- [Minimal module call](examples/minimal/) - complete copyable Terraform root
-- [Packer consumer handoff](examples/packer-consumer/) - overlay for Packer-facing outputs
-- [Adoption and recovery path](examples/adoption-recovery/) - dangerous single-argument overlay
-- [Dependency-cycle failure case](examples/failure-cases/dependency-cycle/) - educational negative case
+| Example | Purpose |
+| --- | --- |
+| [`examples/minimal/`](examples/minimal/) | Smallest valid module call |
+| [`examples/packer-consumer/`](examples/packer-consumer/) | Consumer-shaped output for Packer variables |
+| [`examples/adoption-recovery/`](examples/adoption-recovery/) | Explicit unmanaged-file adoption path |
+| [`examples/failure-cases/`](examples/failure-cases/) | Documented invalid configurations |
 
-## Local verification
+## Local Validation
+
+Run the same core gates used by CI:
 
 ```bash
 make ci
+```
+
+Run graph validation when Terraform dependency shape, graph tooling, fixtures, or release
+evidence changes:
+
+```bash
 make graph
 ```
 
-Generated release evidence is published by CI. The repo intentionally does not commit
-Terraform state, plan files, credentials, provider caches, or environment-specific tfvars.
+The CI target checks Terraform formatting, initialization, validation, tests, TFLint,
+generated Terraform docs drift, documentation layout, and OPA policy tests.
+
+## Quality Controls
+
+| Control | Evidence |
+| --- | --- |
+| Terraform format, init, validate, test, TFLint, docs drift, docs layout, and OPA policy tests | `PR Validation` workflow running `make ci` |
+| Markdown linting and workflow linting | `Repo CI` workflow |
+| GitHub Actions static analysis | `CodeQL Analysis` workflow |
+| Filesystem, IaC, and secret scanning | `Security Scan` workflow |
+| Terraform graph generation and dependency-cycle detection | `Terraform Graph Regression` workflow and `make graph` |
+| Release PRs, changelog, and tags | `Release Please` workflow |
+| Release evidence artifact | `Release Evidence` workflow |
+| Dependency update PRs | Renovate |
 
 ## Documentation
 
-Start with [docs/README.md](docs/README.md) for the Diataxis index and
-[docs/decision-records/README.md](docs/decision-records/README.md) for ADRs.
+- [Use from a Packer template repo](docs/how-to/use-from-a-packer-template.md)
+- [Develop this module](docs/how-to/develop-this-module.md)
+- [Generate Terraform graphs](docs/how-to/generate-terraform-graphs.md)
+- [Review release evidence](docs/how-to/review-release-evidence.md)
+- [Adopt this template](docs/how-to/adopt-this-template.md)
+- [Architecture](docs/explanation/architecture.md)
+- [Testing strategy](docs/explanation/testing-strategy.md)
+- [Dependency graph validation](docs/explanation/dependency-graph-validation.md)
+- [Threat model](docs/explanation/threat-model.md)
+- [Terraform reference](docs/reference/terraform.md)
+- [Release gates](docs/reference/release-gates.md)
+- [Graph artifacts](docs/reference/graph-artifacts.md)
+- [Module invariants](docs/reference/invariants.md)
+- [Golden template contract](docs/reference/golden-template-contract.md)
+- [Decision records](docs/decision-records/README.md)
 
 ## Security
 
 The integrity of the upstream ISO source is outside this module's threat model. Consumers
 are responsible for sourcing trustworthy SHA-256 values from upstream distribution
-channels. Vulnerability reporting is inherited from the organization's
-[Security Policy](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/security/policy).
+channels. See [`SECURITY.md`](SECURITY.md) and
+[`docs/explanation/threat-model.md`](docs/explanation/threat-model.md) for the boundary
+and reporting flow.
+
+Repository-specific contribution and security policy files live in this repository.
+Organization-wide defaults may still be inherited from `nwarila-platform/.github` where
+GitHub supports inherited community-health files.
 
 ## License
 
