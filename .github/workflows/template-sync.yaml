@@ -1,0 +1,20 @@
+name: Template Sync
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: template-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    uses: NWarila/terraform-template/.github/workflows/reusable-template-sync.yaml@aeb3d18f0b42c78c6970b48685d758cb235a36c4
+    with:
+      template_ref: aeb3d18f0b42c78c6970b48685d758cb235a36c4
