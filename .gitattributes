@@ -15,5 +15,5 @@
 .editorconfig    export-ignore
 CHANGELOG.md     export-ignore
 CONTRIBUTING.md  export-ignore
-SECURITY.md     export-ignore
+SECURITY.md      export-ignore
 SUPPORT.md       export-ignore
