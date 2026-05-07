@@ -1,1 +1,13 @@
 * @NWarila
+
+/.github/ @NWarila
+/terraform/ @NWarila
+/examples/ @NWarila
+/docs/decision-records/ @NWarila
+/docs/explanation/threat-model.md @NWarila
+/docs/reference/ @NWarila
+/policies/ @NWarila
+/tools/ @NWarila
+/Makefile @NWarila
+/SECURITY.md @NWarila
+/CONTRIBUTING.md @NWarila
