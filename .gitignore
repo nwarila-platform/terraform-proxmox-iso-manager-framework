@@ -138,6 +138,7 @@
 !/.github/workflows/repo-ci.yml
 !/.github/workflows/security.yaml
 !/.github/workflows/template-sync.yaml
+!/.github/workflows/scorecard.yaml
 
 # ----- [ Terraform module sources and tests ] -----------------------------------------------------
 
