@@ -2,9 +2,17 @@
   // Schema for editor validation. Update only when intentionally adopting a new schema.
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
 
-  // Repo-local Renovate baseline. ADR-0004 allows a shared org baseline, but this
-  // repository keeps the effective policy in-tree so dependency automation remains
-  // operational even if the special .github repository is incomplete.
+  // Renovate config for nwarila/terraform-template and (after sync) every
+  // consumer. Universal across the fleet so that the same Renovate behavior
+  // applies in every Terraform repository under nwarila and nwarila-platform.
+  //
+  // Rules in this file:
+  //   - Pin third-party GitHub Actions to commit SHAs (matches the OPA
+  //     golden_terraform package's enforcement).
+  //   - Pin Terraform and provider versions exactly (org ADR 0005).
+  //   - Track explicit `# renovate:` annotations in workflow comments for
+  //     tool versions (Terraform CLI, TFLint, terraform-docs, OPA, zizmor).
+
   "extends": [
     "config:recommended",
     ":dependencyDashboard",
@@ -19,15 +27,25 @@
   "enabledManagers": [
     "github-actions",
     "terraform",
+    "pip_requirements",
     "custom.regex"
   ],
 
   "customManagers": [
     {
+      // Match `# renovate: datasource=...` annotations followed by a
+      // value: "..." or value: '...' assignment. Catches Terraform/TFLint/
+      // terraform-docs/OPA/zizmor versions in workflow inputs and shell
+      // scripts.
       "customType": "regex",
-      "managerFilePatterns": ["/^\\.github/workflows/.*\\.ya?ml$/"],
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.ya?ml$/",
+        "/^tools/.*\\.sh$/"
+      ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+terraform_version:\\s*\"(?<currentValue>[^\"]+)\""
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+\\w+(?:_VERSION)?:\\s*\"(?<currentValue>[^\"]+)\"",
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+\\w+_VERSION=\"(?<currentValue>[^\"]+)\"",
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+pip install --no-cache-dir (?<depName2>[a-zA-Z0-9-._]+)==(?<currentValue>[^\\s]+)"
       ]
     }
   ],
@@ -50,6 +68,13 @@
       "groupName": "Terraform CLI",
       "semanticCommitType": "deps",
       "semanticCommitScope": "deps"
+    },
+    {
+      "matchDepNames": ["NWarila/terraform-template"],
+      "groupName": "terraform-template",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps",
+      "automerge": false
     }
   ]
 }
