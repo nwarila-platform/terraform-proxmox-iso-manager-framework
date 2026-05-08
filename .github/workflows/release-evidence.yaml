@@ -1,0 +1,29 @@
+name: Release Evidence
+# Caller for nwarila/terraform-template reusable-release-evidence workflow.
+# Generates a uniform evidence bundle on every release and attaches it to
+# the GitHub release. Renovate manages the SHA pin.
+#
+# Dispatched explicitly by reusable-release-please.yaml (via `gh workflow
+# run`) on every release. The release-published trigger is included as a
+# defensive fallback for manual releases.
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    permissions:
+      contents: write
+    uses: NWarila/terraform-template/.github/workflows/reusable-release-evidence.yaml@62ff3607cc7549a3e5a7d63cf201cdfe09e669b3
+    with:
+      # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
+      terraform_version: "1.15.1"

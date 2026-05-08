@@ -21,4 +21,4 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: NWarila/terraform-template/.github/workflows/reusable-auto-merge.yaml@bead9a47e36144999de0bfb1b476860d9fad8196
+    uses: NWarila/terraform-template/.github/workflows/reusable-auto-merge.yaml@62ff3607cc7549a3e5a7d63cf201cdfe09e669b3
