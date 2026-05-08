@@ -131,7 +131,6 @@
 !/.github/renovate.json5
 !/.github/workflows/
 !/.github/workflows/codeql.yaml
-!/.github/workflows/graph-regression.yml
 !/.github/workflows/pr-validation.yaml
 !/.github/workflows/release-please.yaml
 !/.github/workflows/auto-merge.yaml
