@@ -1,4 +1,6 @@
 name: Template Sync
+# Caller for nwarila/terraform-template reusable-template-sync workflow.
+# Renovate manages the SHA pin (both `uses:` and `template_ref:`).
 
 on:
   schedule:

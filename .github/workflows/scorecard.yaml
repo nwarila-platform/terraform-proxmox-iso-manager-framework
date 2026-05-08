@@ -22,4 +22,3 @@ jobs:
       actions: read
       contents: read
     uses: NWarila/terraform-template/.github/workflows/reusable-scorecard.yaml@bead9a47e36144999de0bfb1b476860d9fad8196
-
