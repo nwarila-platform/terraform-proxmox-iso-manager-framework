@@ -7,6 +7,7 @@
 !/.gitignore
 !/.gitattributes
 !/.editorconfig
+!/.template-type
 !/.markdownlint-cli2.jsonc
 !/.pre-commit-config.yaml
 !/.terraform-docs.yml
@@ -135,6 +136,7 @@
 !/.github/workflows/pr-validation.yaml
 !/.github/workflows/release-evidence.yml
 !/.github/workflows/release-please.yaml
+!/.github/workflows/auto-merge.yaml
 !/.github/workflows/repo-ci.yml
 !/.github/workflows/security.yaml
 !/.github/workflows/template-sync.yaml

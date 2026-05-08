@@ -1,0 +1,24 @@
+name: Auto-Merge
+# Caller for nwarila/terraform-template reusable-auto-merge workflow.
+# Enables GitHub auto-merge on trusted-bot PRs (Renovate, template-sync,
+# release-please) once required status checks pass. Human-authored PRs are
+# never auto-merged. Renovate manages the SHA pin.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, labeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: NWarila/terraform-template/.github/workflows/reusable-auto-merge.yaml@bead9a47e36144999de0bfb1b476860d9fad8196

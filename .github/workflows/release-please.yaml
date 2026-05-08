@@ -1,43 +1,27 @@
 name: Release Please
+# Caller for nwarila/terraform-template reusable-release-please workflow.
+# Renovate manages the SHA pin. The dispatch_workflow_on_release input
+# fires release-evidence.yml on the new tag whenever a release is created.
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  actions: write
+  contents: read
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
 
 jobs:
-  release-please:
-    name: Release Please
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Run release-please
-        id: release
-        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
-        with:
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-
-      # release-please publishes the GitHub release using GITHUB_TOKEN, and
-      # GITHUB_TOKEN-driven events do not cascade to other workflows. Dispatching
-      # release-evidence explicitly via gh CLI works because workflow_dispatch is
-      # exempt from that cascade restriction.
-      - name: Dispatch release-evidence
-        if: ${{ steps.release.outputs.release_created == 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Pass workflow expansions through env vars to avoid template
-          # injection (zizmor template-injection finding). Values are
-          # producer-controlled (release-please outputs / GitHub context),
-          # but routing them via env preserves the principle and silences
-          # the audit cleanly.
-          TAG_NAME: ${{ steps.release.outputs.tag_name }}
-          REPOSITORY: ${{ github.repository }}
-        run: gh workflow run release-evidence.yml --ref "$TAG_NAME" --repo "$REPOSITORY"
+  release:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    uses: NWarila/terraform-template/.github/workflows/reusable-release-please.yaml@bead9a47e36144999de0bfb1b476860d9fad8196
+    with:
+      dispatch_workflow_on_release: release-evidence.yml
