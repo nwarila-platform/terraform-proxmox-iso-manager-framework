@@ -1,14 +1,13 @@
 name: Org ADR Sync
 # Caller for nwarila/terraform-template reusable-org-adr-sync workflow.
 # Verifies that org-baseline ADRs mirrored under docs/decision-records/org/
-# match upstream <owner>/.github byte-for-byte. Renovate manages the SHA pin.
+# match upstream <owner>/.github byte-for-byte. Runs on every PR so the
+# check is always available as a required status check in branch
+# protection. Renovate manages the SHA pin.
 
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "docs/decision-records/org/**"
-      - ".github/workflows/org-adr-sync.yaml"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
