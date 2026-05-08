@@ -39,7 +39,7 @@ concurrency:
 
 jobs:
   validate:
-    uses: NWarila/terraform-template/.github/workflows/reusable-terraform-validation.yaml@62ff3607cc7549a3e5a7d63cf201cdfe09e669b3
+    uses: NWarila/terraform-template/.github/workflows/reusable-terraform-validation.yaml@5a9279e0514ab054d89430a4453409213f9f351f
     with:
       # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
       terraform_version: "1.15.1"
@@ -49,5 +49,5 @@ jobs:
       terraform_docs_version: "0.20.0"
       # renovate: datasource=github-releases depName=open-policy-agent/opa extractVersion=^v(?<version>.*)$
       opa_version: "1.10.0"
-      template_ref: 62ff3607cc7549a3e5a7d63cf201cdfe09e669b3
+      template_ref: 5a9279e0514ab054d89430a4453409213f9f351f
       mode: full

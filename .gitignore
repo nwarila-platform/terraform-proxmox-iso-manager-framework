@@ -132,12 +132,11 @@
 !/.github/workflows/
 !/.github/workflows/codeql.yaml
 !/.github/workflows/graph-regression.yml
-!/.github/workflows/org-adr-sync.yml
 !/.github/workflows/pr-validation.yaml
 !/.github/workflows/release-please.yaml
 !/.github/workflows/auto-merge.yaml
 !/.github/workflows/release-evidence.yaml
-!/.github/workflows/repo-ci.yml
+!/.github/workflows/org-adr-sync.yaml
 !/.github/workflows/security.yaml
 !/.github/workflows/template-sync.yaml
 !/.github/workflows/scorecard.yaml
