@@ -3,30 +3,8 @@ name: PR Validation
 on:
   push:
     branches: [main]
-    paths:
-      - "terraform/**"
-      - "examples/**"
-      - "tests/**"
-      - "tools/**"
-      - "docs/**"
-      - "policies/**"
-      - "Makefile"
-      - ".terraform-docs.yml"
-      - ".github/workflows/pr-validation.yaml"
-      - ".editorconfig"
   pull_request:
     branches: [main]
-    paths:
-      - "terraform/**"
-      - "examples/**"
-      - "tests/**"
-      - "tools/**"
-      - "docs/**"
-      - "policies/**"
-      - "Makefile"
-      - ".terraform-docs.yml"
-      - ".github/workflows/pr-validation.yaml"
-      - ".editorconfig"
   merge_group:
   workflow_dispatch:
 
