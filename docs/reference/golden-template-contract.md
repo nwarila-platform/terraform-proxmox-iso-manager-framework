@@ -25,14 +25,15 @@ This contract defines the minimum standard for Terraform module repositories der
 | `.github/CODEOWNERS` | Ownership for high-risk paths |
 | `.github/PULL_REQUEST_TEMPLATE.md` | PR validation and risk evidence |
 | `.github/renovate.json5` | Dependency update policy |
-| `.github/workflows/pr-validation.yaml` | Terraform, docs, lint, and policy gates |
-| `.github/workflows/repo-ci.yml` | Repository linting |
-| `.github/workflows/security.yaml` | Filesystem, IaC, and secret scanning |
+| `.github/workflows/pr-validation.yaml` | Terraform, docs, lint, and policy gates via `make ci` |
+| `.github/workflows/security.yaml` | Filesystem, IaC, secret, and workflow-security scanning |
 | `.github/workflows/codeql.yaml` | GitHub Actions static analysis |
-| `.github/workflows/graph-regression.yml` | Terraform graph evidence |
+| `.github/workflows/scorecard.yaml` | OpenSSF Scorecard |
 | `.github/workflows/release-please.yaml` | Release PR and tag automation |
-| `.github/workflows/release-evidence.yml` | Release evidence artifact generation |
+| `.github/workflows/release-evidence.yaml` | Release evidence artifact generation |
 | `.github/workflows/org-adr-sync.yaml` | Mirrored organization ADR check, when org ADRs are present |
+| `.github/workflows/template-sync.yaml` | Baseline drift detection against framework template |
+| `.github/workflows/auto-merge.yaml` | Auto-merge trusted-bot PRs once required checks pass |
 
 ## Required Terraform layout
 
