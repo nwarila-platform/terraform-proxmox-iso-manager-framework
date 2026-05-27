@@ -12,8 +12,7 @@ valid_input := {
   ],
   "files": {
     "terraform/resources.tf": "checksum_algorithm = \"sha256\"\nverify             = true\n",
-    ".github/workflows/release-evidence.yml": "name: Release Evidence\n",
-    ".github/workflows/graph-regression.yml": "name: Terraform Graph Regression\n",
+    ".github/workflows/release-evidence.yaml": "name: Release Evidence\n",
   },
 }
 

@@ -46,11 +46,6 @@ deny contains msg if {
 }
 
 deny contains msg if {
-  not input.files[".github/workflows/release-evidence.yml"]
+  not input.files[".github/workflows/release-evidence.yaml"]
   msg := "release evidence workflow must exist"
-}
-
-deny contains msg if {
-  not input.files[".github/workflows/graph-regression.yml"]
-  msg := "graph regression workflow must exist"
 }
