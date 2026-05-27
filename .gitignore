@@ -155,3 +155,87 @@
 
 # Terraform state, raw plan files, provider caches, lockfiles, credentials, and
 # environment-specific tfvars remain ignored by the deny-all default.
+
+# ----- [ Framework-template baseline-manifest mirror ] --------------------------------------------
+# Mirrors of NWarila/terraform-framework-template@<pin> baseline-manifest.json
+# byte_identical entries. Drift is enforced by template-sync.yaml; do not
+# modify these files locally - bump the SHA pin in template-sync.yaml instead.
+
+# Reusable workflows pulled in for byte-identical mirroring (callers cross-repo
+# via `uses:`; local copies satisfy drift-gate).
+!/.github/workflows/reusable-auto-merge.yaml
+!/.github/workflows/reusable-codeql.yaml
+!/.github/workflows/reusable-iac-security.yaml
+!/.github/workflows/reusable-release-evidence.yaml
+!/.github/workflows/reusable-release-please.yaml
+!/.github/workflows/reusable-scorecard.yaml
+!/.github/workflows/reusable-terraform-deploy.yaml
+
+# Diataxis quadrant placeholders + canonical reference docs.
+!/docs/tutorials/.gitkeep
+!/docs/how-to/.gitkeep
+!/docs/reference/.gitkeep
+!/docs/explanation/.gitkeep
+!/docs/reference/mirroring.md
+!/docs/reference/quality-gates.md
+!/docs/reference/runner-protocol.md
+
+# Template-tier ADR mirror (separate from org/ and repo/ tiers).
+!/docs/decision-records/template/
+!/docs/decision-records/template/.gitkeep
+!/docs/decision-records/template/README.md
+!/docs/decision-records/template/0001-pin-terraform-and-provider-versions-exactly.md
+!/docs/decision-records/template/0002-keep-reference-framework-credential-free.md
+!/docs/decision-records/template/0004-isolate-pull-request-target-triggers.md
+!/docs/decision-records/repo/.gitkeep
+
+# Universal OPA policies.
+!/policies/opa/repo_hygiene.rego
+!/policies/opa/repo_hygiene_test.rego
+!/policies/opa/terraform_plan.rego
+!/policies/opa/terraform_plan_test.rego
+
+# CI helper tooling.
+!/tools/build_opa_input.py
+!/tools/build_plan_input.py
+!/tools/check_adr_schema.py
+!/tools/check_baseline_manifest.py
+!/tools/check_privileged_workflows.py
+!/tools/run_privileged_workflow_tests.py
+!/tools/verify.py
+!/tools/ci/
+!/tools/ci/apply_overlay.sh
+!/tools/ci/check_workflow_run_inputs.py
+!/tools/ci/config.toml
+!/tools/ci/run_integration.py
+!/tools/ci/terraform_tfvars_args.sh
+!/tools/ci/validate_framework_ref.sh
+
+# Bats tests for CI helper tooling.
+!/tests/ci/
+!/tests/ci/apply_overlay.bats
+!/tests/ci/check_workflow_run_inputs.bats
+!/tests/ci/terraform_tfvars_args.bats
+!/tests/ci/validate_framework_ref.bats
+
+# Privileged-workflow security fixtures.
+!/tests/fixtures/privileged-workflows/
+!/tests/fixtures/privileged-workflows/bad/
+!/tests/fixtures/privileged-workflows/bad/.github/
+!/tests/fixtures/privileged-workflows/bad/.github/workflows/
+!/tests/fixtures/privileged-workflows/bad/.github/workflows/auto-merge.yaml
+!/tests/fixtures/privileged-workflows/good/
+!/tests/fixtures/privileged-workflows/good/.github/
+!/tests/fixtures/privileged-workflows/good/.github/workflows/
+!/tests/fixtures/privileged-workflows/good/.github/workflows/auto-merge.yaml
+!/tests/fixtures/privileged-workflows/reusable-bad/
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml
+
+# Integration fixtures.
+!/fixtures/
+!/fixtures/integration/
+!/fixtures/integration/basic/
+!/fixtures/integration/basic/README.md

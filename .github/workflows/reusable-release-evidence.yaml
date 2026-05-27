@@ -1,0 +1,303 @@
+name: Reusable Release Evidence
+
+# Generates and attaches a uniform evidence bundle to every release in every
+# consumer of NWarila/terraform-framework-template. The bundle proves the release
+# passed every gate the contract enforces, and (for frameworks) captures
+# the actual terraform fmt/validate/test outputs at the released SHA.
+#
+# Trigger model
+# -------------
+# release-please publishes the GitHub release using GITHUB_TOKEN, and
+# GITHUB_TOKEN-driven events do not cascade to other workflows. The
+# release-please reusable explicitly dispatches the `release.yaml`
+# release-evidence task via `gh workflow run` (which IS exempt from the
+# cascade restriction) whenever a release is created.
+#
+# Type-aware behavior
+# -------------------
+# framework — runs `terraform fmt/init/validate/test` against `terraform/`
+#             and bundles the JSON outputs alongside the terraform-docs
+#             reference and the docs-layout check.
+# runner    — captures the `repos/` inventory plus the pinned
+#             framework_ref at the released SHA. No Terraform run.
+# template  - runner-template repos are runner-shaped but also carry
+#             template tooling; captures runner-shaped evidence without
+#             running Terraform.
+#
+# Caller pattern (every consumer):
+#   name: Release Evidence
+#   on:
+#     workflow_dispatch:
+#     release:
+#       types: [published]
+#   permissions:
+#     contents: write
+#   jobs:
+#     evidence:
+#       uses: NWarila/terraform-framework-template/.github/workflows/reusable-release-evidence.yaml@<sha>
+#       with:
+#         terraform_version: "1.15.4"
+#         repo_type: framework
+
+on:
+  workflow_call:
+    inputs:
+      terraform_version:
+        description: |
+          Exact Terraform version (used for framework-shape repos to run
+          terraform fmt/init/validate/test). Runner repos ignore this input.
+        required: true
+        type: string
+      repo_type:
+        description: |
+          Explicit repo type for release evidence: framework, runner, or template.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    name: Build release evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      attestations: write
+      contents: write  # required for `gh release upload`
+      id-token: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository at release SHA
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate repo type
+        id: type
+        env:
+          REPO_TYPE: ${{ inputs.repo_type }}
+        run: |
+          set -euo pipefail
+          t="${REPO_TYPE}"
+          case "$t" in
+            framework|runner|template) ;;
+            *)
+              echo "::error::unknown repo type '$t' (expected framework, runner, or template)"
+              exit 1
+              ;;
+          esac
+          echo "type=$t" >> "$GITHUB_OUTPUT"
+          echo "repo type: $t"
+
+      - name: Setup Terraform (framework only)
+        if: steps.type.outputs.type == 'framework'
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: false
+
+      - name: Setup Python (for docs-layout + JSON post-processing)
+        if: steps.type.outputs.type == 'framework'
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Generate framework evidence
+        if: steps.type.outputs.type == 'framework'
+        env:
+          OUT: release-evidence
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"/{logs,validate,tests,docs,reference}
+          : > "$OUT/.gate-results.tsv"
+
+          record() {
+            printf '%s\t%s\t%s\n' "$1" "$2" "$3" >> "$OUT/.gate-results.tsv"
+          }
+
+          # terraform fmt
+          if terraform -chdir=terraform fmt -check -recursive > "$OUT/logs/terraform-fmt.txt" 2>&1; then
+            record "terraform fmt"      pass "logs/terraform-fmt.txt"
+          else
+            record "terraform fmt"      fail "logs/terraform-fmt.txt"
+          fi
+
+          # terraform init (no backend; evidence only)
+          if terraform -chdir=terraform init -backend=false -input=false \
+              > "$OUT/logs/terraform-init.txt" 2>&1; then
+            record "terraform init"     pass "logs/terraform-init.txt"
+          else
+            record "terraform init"     fail "logs/terraform-init.txt"
+          fi
+
+          # terraform validate
+          if terraform -chdir=terraform validate -json \
+              > "$OUT/validate/terraform.validate.json" \
+              2> "$OUT/logs/terraform-validate.stderr.txt"; then
+            record "terraform validate" pass "validate/terraform.validate.json"
+          else
+            record "terraform validate" fail "validate/terraform.validate.json"
+          fi
+
+          # terraform test (no-op when no .tftest.hcl files exist)
+          if terraform -chdir=terraform test -json \
+              > "$OUT/tests/terraform-test.json" \
+              2> "$OUT/logs/terraform-test.stderr.txt"; then
+            record "terraform test"     pass "tests/terraform-test.json"
+          else
+            record "terraform test"     fail "tests/terraform-test.json"
+          fi
+
+          # docs-layout (Diátaxis) — only if the script is present
+          if [ -f tools/check_docs_layout.py ]; then
+            if python3 tools/check_docs_layout.py > "$OUT/docs/docs-layout.txt" 2>&1; then
+              record "docs layout"      pass "docs/docs-layout.txt"
+            else
+              record "docs layout"      fail "docs/docs-layout.txt"
+            fi
+          else
+            echo "tools/check_docs_layout.py not present" > "$OUT/docs/docs-layout.txt"
+            record "docs layout"        skipped "docs/docs-layout.txt"
+          fi
+
+          # terraform-docs reference snapshot — copy if present
+          if [ -f docs/reference/terraform.md ]; then
+            cp docs/reference/terraform.md "$OUT/reference/terraform.md"
+            record "terraform-docs snapshot" pass "reference/terraform.md"
+          fi
+
+          # Capture commit + ref metadata
+          {
+            echo "release_sha=${GITHUB_SHA}"
+            echo "release_ref=${GITHUB_REF}"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "run_id=${GITHUB_RUN_ID}"
+          } > "$OUT/metadata.txt"
+
+      - name: Generate runner/template evidence
+        if: steps.type.outputs.type == 'runner' || steps.type.outputs.type == 'template'
+        env:
+          OUT: release-evidence
+          REPO_TYPE: ${{ steps.type.outputs.type }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT/repos"
+          echo "${REPO_TYPE}" > "$OUT/repo-type.txt"
+
+          # Capture the public repo inventory at this tag.
+          if [ -d repos/public ]; then
+            (cd repos/public && find . -type f -name '*.yml' -o -name '*.yaml' | sort) \
+              > "$OUT/repos/public-inventory.txt"
+            tar -C repos/public -czf "$OUT/repos/public-snapshot.tar.gz" .
+          fi
+
+          # Private repo definitions live in S3, so we can only assert that
+          # the directory marker is committed.
+          if [ -d repos/private ]; then
+            (cd repos/private && find . -type f | sort) \
+              > "$OUT/repos/private-inventory.txt"
+          fi
+
+          # Pinned framework_ref from pr-validation.yaml — proves which
+          # framework version this runner targeted at release time.
+          if [ -f .github/workflows/pr-validation.yaml ]; then
+            grep -E '^\s*framework_(repo|ref):' .github/workflows/pr-validation.yaml \
+              > "$OUT/framework-pin.txt" || echo "no framework pin found" > "$OUT/framework-pin.txt"
+          fi
+
+          # Pinned framework SHA from terraform-deploy.yaml — proves which
+          # deploy reusable version is in effect.
+          if [ -f .github/workflows/terraform-deploy.yaml ]; then
+            grep -E 'reusable-terraform-deploy\.yaml@[0-9a-f]{40}' \
+              .github/workflows/terraform-deploy.yaml \
+              > "$OUT/deploy-pin.txt" || true
+          fi
+
+          {
+            echo "release_sha=${GITHUB_SHA}"
+            echo "release_ref=${GITHUB_REF}"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "run_id=${GITHUB_RUN_ID}"
+          } > "$OUT/metadata.txt"
+
+      - name: Render gate-results summary
+        if: steps.type.outputs.type == 'framework'
+        env:
+          OUT: release-evidence
+        run: |
+          set -euo pipefail
+          if [ ! -f "$OUT/.gate-results.tsv" ]; then
+            exit 0
+          fi
+          {
+            echo "## Release evidence — gate results"
+            echo ""
+            echo "| Gate | Result | Evidence |"
+            echo "| --- | --- | --- |"
+            while IFS=$'\t' read -r gate result evidence; do
+              echo "| $gate | $result | \`$evidence\` |"
+            done < "$OUT/.gate-results.tsv"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail failed framework evidence gates
+        if: steps.type.outputs.type == 'framework'
+        env:
+          OUT: release-evidence
+        run: |
+          set -euo pipefail
+          if [ -f "$OUT/.gate-results.tsv" ] && grep -q $'\tfail\t' "$OUT/.gate-results.tsv"; then
+            cat "$OUT/.gate-results.tsv"
+            exit 1
+          fi
+
+      - name: Bundle evidence
+        run: tar -czf release-evidence.tar.gz release-evidence/
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: release-evidence
+          format: spdx-json
+          output-file: release-evidence.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+
+      - name: Attest release evidence provenance
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: release-evidence.tar.gz
+
+      - name: Attest release evidence SBOM
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: release-evidence.tar.gz
+          sbom-path: release-evidence.spdx.json
+
+      - name: Upload to workflow run (always, for forensic access)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-evidence
+          path: |
+            release-evidence.tar.gz
+            release-evidence.spdx.json
+          if-no-files-found: error
+
+      - name: Attach to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # github.event.release.tag_name is set on `release: published`
+          # triggers; github.ref_name on `push: tags` triggers; either way
+          # we get the tag name.
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAG}" ] || [[ "${TAG}" == refs/* ]]; then
+            echo "::warning::no release tag in context (TAG='${TAG}'); skipping release upload."
+            exit 0
+          fi
+          gh release upload "${TAG}" release-evidence.tar.gz release-evidence.spdx.json

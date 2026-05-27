@@ -1,0 +1,405 @@
+name: Reusable Terraform Deploy
+
+# Reusable workflow consumed by runner repos that derive their data
+# from this do-nothing reference framework.
+#
+# A "runner" is a data-only deployer: it owns repos/public/ +
+# repos/private/ (per terraform-runner-template's contract) and
+# delegates the actual terraform plan/apply to this workflow. The
+# workflow:
+#
+#   1. Checks out this framework at framework_ref (a 40-char SHA).
+#   2. Checks out the consumer (the runner) at consumer_ref.
+#   3. Applies overlay_paths — copying the runner's data onto the
+#      framework checkout so terraform sees a single assembled tree.
+#   4. Sets up the pinned Terraform CLI version.
+#   5. Optionally prepares a caller-supplied S3 backend.
+#   6. terraform init + plan against the assembled tree.
+#   7. Optionally terraform apply (gated by input.apply).
+#   8. Verifies remote state when using the S3 backend.
+#
+# PR callers normally use the local backend so validation remains
+# credential-free. Trusted deploy callers can set backend_mode=s3 and pass
+# OIDC/S3 secrets to exercise a production-shaped state path.
+
+on:
+  workflow_call:
+    inputs:
+      framework_ref:
+        description: |
+          40-character commit SHA of this framework (NWarila/terraform-framework-template)
+          to check out. Renovate keeps this current in lockstep with the
+          caller's `uses:` pin.
+        required: true
+        type: string
+      consumer_repo:
+        description: |
+          owner/repo of the runner calling this workflow. Defaults to
+          the caller via github.repository when omitted.
+        required: false
+        type: string
+        default: ""
+      consumer_ref:
+        description: |
+          Git ref of the runner to check out. Defaults to github.sha
+          (the SHA of the calling workflow's commit).
+        required: false
+        type: string
+        default: ""
+      overlay_paths:
+        description: |
+          Newline-separated `<consumer-src>=><framework-dst>` entries
+          describing what to copy from the runner into the framework
+          tree before terraform sees it. Directory sources are copied as
+          contents, including dotfiles. Trailing slashes are accepted for
+          readability but have no separate meaning. Example:
+
+            repos/public=>terraform/repos/public
+            repos/private=>terraform/repos/private
+
+          Empty input is allowed (rare — most runners overlay something).
+          Paths must be relative and must not contain `..` traversal segments.
+          Destinations must stay under `terraform/repos/` or
+          `terraform/fixtures/runtime/`; overlay entries cannot modify
+          framework implementation files or workflow files.
+        required: false
+        type: string
+        default: ""
+      terraform_version:
+        description: |
+          Exact Terraform CLI version to install. Caller controls so
+          each runner can move forward independently with Renovate's help.
+        required: false
+        type: string
+        default: "1.15.4"
+      apply:
+        description: |
+          When true, apply the saved Terraform plan after the
+          plan. Default false — most callers gate apply to specific
+          branches/events. Caller is responsible for ensuring inputs
+          are safe to apply (the framework runs in the caller's CI
+          context with the caller's GITHUB_TOKEN).
+        required: false
+        type: boolean
+        default: false
+      tfvars_file:
+        description: |
+          Optional path within the consumer to a tfvars file that
+          should be passed to terraform plan/apply via -var-file.
+          Path is interpreted relative to the consumer checkout.
+          Absolute paths and `..` traversal segments are rejected.
+          Empty means no -var-file argument is added.
+        required: false
+        type: string
+        default: ""
+      backend_mode:
+        description: |
+          Terraform backend mode for this run: "local" or "s3".
+          "local" keeps reference validation credential-free. "s3"
+          generates a partial S3 backend block and requires the AWS/S3
+          secrets below.
+        required: false
+        type: string
+        default: "local"
+      backend_key_prefix:
+        description: |
+          Optional non-secret fallback state-key prefix used when
+          secrets.backend_key_prefix is not set. The final key is
+          `<prefix>/terraform.tfstate`.
+        required: false
+        type: string
+        default: ""
+      upload_plan_artifact:
+        description: |
+          Upload the binary tfplan artifact. Keep false for trusted
+          remote-backend deploys because Terraform plan files can contain
+          sensitive values in real frameworks.
+        required: false
+        type: boolean
+        default: true
+
+    secrets:
+      aws_role_arn:
+        description: IAM role ARN assumed through GitHub OIDC when backend_mode=s3.
+        required: false
+      aws_region:
+        description: AWS region for OIDC credentials and S3 backend access.
+        required: false
+      backend_bucket:
+        description: Bare S3 bucket name for Terraform state when backend_mode=s3.
+        required: false
+      backend_key_prefix:
+        description: Optional secret state-key prefix; overrides inputs.backend_key_prefix.
+        required: false
+
+    outputs:
+      plan_status:
+        description: '"no-changes" | "has-changes" | "failed"'
+        value: ${{ jobs.deploy.outputs.plan_status }}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: framework-template / deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      plan_status: ${{ steps.plan.outputs.plan_status }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Resolve consumer-ref / consumer-repo defaults
+        id: refs
+        env:
+          OVERRIDE_REPO: ${{ inputs.consumer_repo }}
+          OVERRIDE_REF: ${{ inputs.consumer_ref }}
+          FALLBACK_REPO: ${{ github.repository }}
+          FALLBACK_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          repo="${OVERRIDE_REPO:-$FALLBACK_REPO}"
+          ref="${OVERRIDE_REF:-$FALLBACK_REF}"
+          echo "consumer_repo=${repo}" >> "${GITHUB_OUTPUT}"
+          echo "consumer_ref=${ref}"   >> "${GITHUB_OUTPUT}"
+
+      - name: Validate backend mode
+        env:
+          BACKEND_MODE: ${{ inputs.backend_mode }}
+        run: |
+          set -euo pipefail
+          case "${BACKEND_MODE}" in
+            local|s3)
+              ;;
+            *)
+              echo "::error::backend_mode must be 'local' or 's3', got '${BACKEND_MODE}'"
+              exit 1
+              ;;
+          esac
+
+      - name: Check out framework at framework_ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: NWarila/terraform-framework-template
+          ref: ${{ inputs.framework_ref }}
+          path: framework
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate framework_ref
+        env:
+          FRAMEWORK_REF: ${{ inputs.framework_ref }}
+        run: bash framework/tools/ci/validate_framework_ref.sh "${FRAMEWORK_REF}"
+
+      - name: Check out consumer (runner) at consumer_ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ steps.refs.outputs.consumer_repo }}
+          ref: ${{ steps.refs.outputs.consumer_ref }}
+          path: consumer
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Apply overlay (consumer → framework)
+        if: ${{ inputs.overlay_paths != '' }}
+        env:
+          OVERLAY_PATHS: ${{ inputs.overlay_paths }}
+        run: |
+          set -euo pipefail
+          bash framework/tools/ci/apply_overlay.sh consumer framework "${OVERLAY_PATHS}"
+
+      - name: Setup Terraform
+        # renovate: datasource=github-releases depName=hashicorp/terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: false
+
+      - name: Prepare S3 backend
+        if: ${{ inputs.backend_mode == 's3' }}
+        env:
+          AWS_ROLE_ARN: ${{ secrets.aws_role_arn }}
+          AWS_REGION: ${{ secrets.aws_region }}
+          BACKEND_BUCKET: ${{ secrets.backend_bucket }}
+          BACKEND_KEY_PREFIX_SECRET: ${{ secrets.backend_key_prefix }}
+          BACKEND_KEY_PREFIX_INPUT: ${{ inputs.backend_key_prefix }}
+          CONSUMER_REPO: ${{ steps.refs.outputs.consumer_repo }}
+        run: |
+          set -euo pipefail
+
+          missing=0
+          for name in AWS_ROLE_ARN AWS_REGION BACKEND_BUCKET; do
+            if [ -z "${!name}" ]; then
+              echo "::error::${name} is required when backend_mode=s3."
+              missing=1
+            fi
+          done
+          if [ "${missing}" -ne 0 ]; then
+            exit 1
+          fi
+
+          for value in "${AWS_ROLE_ARN}" "${AWS_REGION}" "${BACKEND_BUCKET}"; do
+            echo "::add-mask::${value}"
+          done
+
+          account_id="$(printf '%s' "${AWS_ROLE_ARN}" | sed -n 's#^arn:aws:iam::\([0-9][0-9]*\):role/.*#\1#p')"
+          if [ -n "${account_id}" ]; then
+            echo "::add-mask::${account_id}"
+          fi
+
+          if [[ "${BACKEND_BUCKET}" == arn:aws:s3:::* ]] || [[ "${BACKEND_BUCKET}" == s3://* ]] || [[ "${BACKEND_BUCKET}" == */* ]]; then
+            echo "::error::backend_bucket must be the bare S3 bucket name, not an ARN, URI, or path."
+            exit 1
+          fi
+
+          prefix="${BACKEND_KEY_PREFIX_SECRET:-$BACKEND_KEY_PREFIX_INPUT}"
+          if [ -z "${prefix}" ]; then
+            prefix="$(printf '%s' "${CONSUMER_REPO}" | tr '[:upper:]' '[:lower:]')"
+          fi
+          prefix="${prefix%/}"
+
+          if [ -z "${prefix}" ] || [[ "${prefix}" == /* ]] || [[ "${prefix}" == *..* ]] || [[ "${prefix}" =~ [[:space:]] ]]; then
+            echo "::error::backend_key_prefix must be a relative S3 key prefix without '..' or whitespace."
+            exit 1
+          fi
+
+          state_key="${prefix}/terraform.tfstate"
+          echo "::add-mask::${prefix}"
+          echo "::add-mask::${state_key}"
+          echo "TF_BACKEND_STATE_KEY=${state_key}" >> "${GITHUB_ENV}"
+
+          cat > framework/terraform/backend.generated.tf <<'EOF'
+          terraform {
+            backend "s3" {
+              encrypt           = true
+              use_fips_endpoint = true
+              use_lockfile      = true
+            }
+          }
+          EOF
+
+          echo "S3 backend configuration prepared."
+
+      - name: Configure AWS credentials
+        if: ${{ inputs.backend_mode == 's3' }}
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        with:
+          role-to-assume: ${{ secrets.aws_role_arn }}
+          role-session-name: terraform-framework-deploy
+          aws-region: ${{ secrets.aws_region }}
+          mask-aws-account-id: true
+
+      - name: terraform init
+        working-directory: framework/terraform
+        env:
+          BACKEND_MODE: ${{ inputs.backend_mode }}
+          BACKEND_BUCKET: ${{ secrets.backend_bucket }}
+          AWS_REGION: ${{ secrets.aws_region }}
+        run: |
+          set -euo pipefail
+          if [ "${BACKEND_MODE}" = "s3" ]; then
+            terraform init \
+              -backend-config="bucket=${BACKEND_BUCKET}" \
+              -backend-config="key=${TF_BACKEND_STATE_KEY}" \
+              -backend-config="region=${AWS_REGION}" \
+              -input=false
+          else
+            terraform init -input=false
+          fi
+
+      - name: terraform plan
+        id: plan
+        working-directory: framework/terraform
+        env:
+          TFVARS_FILE: ${{ inputs.tfvars_file }}
+        run: |
+          set -euo pipefail
+          args=( -input=false -lock-timeout=300s -out=tfplan -detailed-exitcode )
+          if [ -n "${TFVARS_FILE}" ]; then
+            tfvars_arg="$(bash ../tools/ci/terraform_tfvars_args.sh "${TFVARS_FILE}")"
+            args+=( "${tfvars_arg}" )
+          fi
+          set +e
+          terraform plan "${args[@]}"
+          rc=$?
+          set -e
+          # detailed-exitcode: 0 = no changes; 1 = error; 2 = changes.
+          case "${rc}" in
+            0)
+              echo "plan_status=no-changes" >> "${GITHUB_OUTPUT}"
+              echo "Plan: no changes." ;;
+            2)
+              echo "plan_status=has-changes" >> "${GITHUB_OUTPUT}"
+              echo "Plan: changes detected." ;;
+            *)
+              echo "plan_status=failed" >> "${GITHUB_OUTPUT}"
+              echo "::error::terraform plan failed (exit ${rc})"
+              exit "${rc}" ;;
+          esac
+
+      - name: Upload plan artifact
+        if: ${{ always() && inputs.upload_plan_artifact }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tfplan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: framework/terraform/tfplan
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: terraform apply
+        if: ${{ inputs.apply && steps.plan.outputs.plan_status == 'has-changes' }}
+        working-directory: framework/terraform
+        run: terraform apply -input=false tfplan
+
+      - name: Verify S3 state object
+        if: ${{ inputs.apply && inputs.backend_mode == 's3' }}
+        env:
+          BACKEND_BUCKET: ${{ secrets.backend_bucket }}
+        run: |
+          set -euo pipefail
+
+          encryption="$(aws s3api head-object \
+            --bucket "${BACKEND_BUCKET}" \
+            --key "${TF_BACKEND_STATE_KEY}" \
+            --query 'ServerSideEncryption' \
+            --output text)"
+
+          if [ "${encryption}" != "AES256" ] && [ "${encryption}" != "aws:kms" ]; then
+            echo "::error::State object is missing expected server-side encryption."
+            exit 1
+          fi
+
+          content_length="$(aws s3api head-object \
+            --bucket "${BACKEND_BUCKET}" \
+            --key "${TF_BACKEND_STATE_KEY}" \
+            --query 'ContentLength' \
+            --output text)"
+
+          if ! [[ "${content_length}" =~ ^[0-9]+$ ]] || [ "${content_length}" -le 0 ]; then
+            echo "::error::State object exists but has no content."
+            exit 1
+          fi
+
+          {
+            echo "### S3 state backend verification"
+            echo "- State object verified with \`aws s3api head-object\`"
+            echo "- Size: ${content_length} bytes"
+            echo "- Encryption: ${encryption}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload state artifact (do-nothing framework only)
+        # The do-nothing framework uses the local backend, so state
+        # lives in framework/terraform/terraform.tfstate. Real
+        # derivative frameworks override the backend and never produce
+        # a local state file — this step would be a no-op for them.
+        if: ${{ always() && inputs.apply && inputs.backend_mode == 'local' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tfstate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: framework/terraform/terraform.tfstate
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,0 +1,10 @@
+repo_role = "framework"
+artifact_root = ".tmp/ci/integration"
+default_case = "basic"
+tflint_config = ".tflint.hcl"
+
+[[cases]]
+name = "basic"
+module_source = "terraform"
+tfvars_source = "examples/single-environment/terraform.tfvars.example"
+tflint = true

@@ -24,6 +24,7 @@ ADR_ROOT = DOCS / "decision-records"
 ADR_ALLOWED_SUBTREES = {
     ADR_ROOT / "org",
     ADR_ROOT / "repo",
+    ADR_ROOT / "template",
 }
 
 
