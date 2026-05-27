@@ -32,7 +32,7 @@ This contract defines the minimum standard for Terraform module repositories der
 | `.github/workflows/graph-regression.yml` | Terraform graph evidence |
 | `.github/workflows/release-please.yaml` | Release PR and tag automation |
 | `.github/workflows/release-evidence.yml` | Release evidence artifact generation |
-| `.github/workflows/org-adr-sync.yml` | Mirrored organization ADR check, when org ADRs are present |
+| `.github/workflows/org-adr-sync.yaml` | Mirrored organization ADR check, when org ADRs are present |
 
 ## Required Terraform layout
 

@@ -118,8 +118,6 @@ Pending. This ADR ships with the config change that inlines `.github/renovate.js
 
 - [ADR-0004 (org)](../org/0004-use-renovate-for-dependency-updates.md) — establishes the
   desired shared-baseline pattern.
-- [ADR-0005 (org)](../org/0005-pin-terraform-and-provider-versions-exactly.md) — requires
-  exact Terraform and provider pins.
 
 ## Compliance Notes
 

@@ -13,8 +13,10 @@ Terraform child module for one job: manage one Proxmox VE installer ISO from a
 Git-tracked pin containing `url`, `sha256`, and `filename`.
 
 The module turns that pin into a SHA-verified Proxmox ISO path such as
-`cephFS:iso/Rocky-9.6-x86_64-dvd.iso`, which Packer template repositories can consume as
-`iso_file`.
+`cephFS:iso/Rocky-9.6-x86_64-dvd.iso`, which Packer template repositories render into
+`boot_iso` and `additional_iso_files` pkrvars matching the
+[`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
+variable types.
 
 ## What this demonstrates
 
@@ -57,14 +59,34 @@ module "iso" {
   storage = "cephFS"
 }
 
-output "iso_file" {
-  value = module.iso.iso_path
+output "boot_iso" {
+  value = {
+    iso_checksum         = "sha256:${module.iso.iso_sha256}"
+    iso_file             = module.iso.iso_path
+    iso_urls             = null
+    cd_label             = null
+    index                = 0
+    iso_download_pve     = false
+    iso_storage_pool     = null
+    iso_target_extension = null
+    iso_target_path      = null
+    keep_cdrom_device    = false
+    type                 = "scsi"
+    unmount              = true
+  }
 }
 
-output "iso_checksum" {
-  value = "sha256:${module.iso.iso_sha256}"
+output "additional_iso_files" {
+  value = []
 }
 ```
+
+The outputs above match the `boot_iso` and `additional_iso_files` variable types declared by
+[`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
+and is intended to be rendered into an auto-loaded `*.auto.pkrvars.hcl` file via
+`templatefile()` and `local_file`. See
+[Use from a Packer template](docs/how-to/use-from-a-packer-template.md) for the rendering
+pattern.
 
 Consumers must pin the module to a release tag and import the `//terraform` subdirectory.
 The exact Terraform and provider pins live in [`terraform/versions.tf`](terraform/versions.tf).

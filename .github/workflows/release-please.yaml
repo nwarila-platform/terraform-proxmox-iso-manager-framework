@@ -1,21 +1,41 @@
 name: Release Please
+# Native release-please integration. Runs on every push to main.
+# release-please-action creates and maintains a release PR; on merge of that
+# PR, it tags + publishes the GitHub release. Because GITHUB_TOKEN-driven
+# events do not cascade, this workflow explicitly dispatches
+# release-evidence.yaml via gh CLI (workflow_dispatch is exempt from the
+# cascade restriction) so the new tag gets a uniform evidence bundle.
+#
+# This workflow is intentionally NOT a caller for any reusable workflow:
+# NWarila/terraform-framework-template/reusable-release-please dispatches
+# `release.yaml` with `task=release-evidence`, but this repo's evidence
+# entrypoint is `release-evidence.yaml`. Adopting that reusable requires
+# renaming the evidence workflow and adding a `task` workflow_dispatch
+# input; until that migration lands, this native form is the working
+# release pipeline.
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  actions: write
+  contents: read
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
 
 jobs:
   release-please:
     name: Release Please
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
 
     steps:
       - name: Run release-please
@@ -26,9 +46,8 @@ jobs:
           manifest-file: .release-please-manifest.json
 
       # release-please publishes the GitHub release using GITHUB_TOKEN, and
-      # GITHUB_TOKEN-driven events do not cascade to other workflows. Dispatching
-      # release-evidence explicitly via gh CLI works because workflow_dispatch is
-      # exempt from that cascade restriction.
+      # GITHUB_TOKEN-driven events do not cascade to other workflows.
+      # workflow_dispatch IS exempt from that cascade restriction.
       - name: Dispatch release-evidence
         if: ${{ steps.release.outputs.release_created == 'true' }}
         env:
@@ -36,8 +55,8 @@ jobs:
           # Pass workflow expansions through env vars to avoid template
           # injection (zizmor template-injection finding). Values are
           # producer-controlled (release-please outputs / GitHub context),
-          # but routing them via env preserves the principle and silences
-          # the audit cleanly.
+          # but routing via env preserves the principle and silences the
+          # audit cleanly.
           TAG_NAME: ${{ steps.release.outputs.tag_name }}
           REPOSITORY: ${{ github.repository }}
-        run: gh workflow run release-evidence.yml --ref "$TAG_NAME" --repo "$REPOSITORY"
+        run: gh workflow run release-evidence.yaml --ref "$TAG_NAME" --repo "$REPOSITORY"

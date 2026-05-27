@@ -3,30 +3,8 @@ name: PR Validation
 on:
   push:
     branches: [main]
-    paths:
-      - "terraform/**"
-      - "examples/**"
-      - "tests/**"
-      - "tools/**"
-      - "docs/**"
-      - "policies/**"
-      - "Makefile"
-      - ".terraform-docs.yml"
-      - ".github/workflows/pr-validation.yaml"
-      - ".editorconfig"
   pull_request:
     branches: [main]
-    paths:
-      - "terraform/**"
-      - "examples/**"
-      - "tests/**"
-      - "tools/**"
-      - "docs/**"
-      - "policies/**"
-      - "Makefile"
-      - ".terraform-docs.yml"
-      - ".github/workflows/pr-validation.yaml"
-      - ".editorconfig"
   merge_group:
   workflow_dispatch:
 
@@ -39,15 +17,32 @@ concurrency:
 
 jobs:
   validate:
-    uses: NWarila/terraform-template/.github/workflows/reusable-terraform-validation.yaml@7ce84506f03cfff4904923724bed9e42804e7644
-    with:
-      # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
-      terraform_version: "1.15.1"
-      # renovate: datasource=github-releases depName=terraform-linters/tflint extractVersion=^v(?<version>.*)$
-      tflint_version: "0.59.1"
-      # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.*)$
-      terraform_docs_version: "0.20.0"
-      # renovate: datasource=github-releases depName=open-policy-agent/opa extractVersion=^v(?<version>.*)$
-      opa_version: "1.10.0"
-      template_ref: 7ce84506f03cfff4904923724bed9e42804e7644
-      mode: full
+    name: make ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
+          terraform_version: "1.15.2"
+          terraform_wrapper: false
+
+      - name: Install pinned CI tools
+        env:
+          # renovate: datasource=github-releases depName=terraform-linters/tflint extractVersion=^v(?<version>.*)$
+          TFLINT_VERSION: "0.62.0"
+          # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.*)$
+          TERRAFORM_DOCS_VERSION: "0.23.0"
+          # renovate: datasource=github-releases depName=open-policy-agent/opa extractVersion=^v(?<version>.*)$
+          OPA_VERSION: "1.10.0"
+        run: bash tools/install_ci_tools.sh
+
+      - name: Run local CI gates
+        run: make ci
