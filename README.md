@@ -1,7 +1,6 @@
 # terraform-proxmox-iso-manager-framework
 
-[![Repo CI](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/repo-ci.yml?branch=main&label=Repo%20CI)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/repo-ci.yml)
-[![Terraform Tests](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/pr-validation.yaml?branch=main&label=Terraform%20Tests)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/pr-validation.yaml)
+[![PR Validation](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/pr-validation.yaml?branch=main&label=PR%20Validation)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/pr-validation.yaml)
 [![Security Scan](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/security.yaml?branch=main&label=Security)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/security.yaml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/nwarila-platform/terraform-proxmox-iso-manager-framework/codeql.yaml?branch=main&label=CodeQL)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/actions/workflows/codeql.yaml)
 [![Latest Release](https://img.shields.io/github/v/release/nwarila-platform/terraform-proxmox-iso-manager-framework?label=Release)](https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework/releases)

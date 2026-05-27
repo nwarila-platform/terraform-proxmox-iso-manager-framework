@@ -1,61 +1,30 @@
 # Review Release Evidence
 
-Release evidence is produced by the `release-evidence.yml` workflow and uploaded as a
-GitHub Actions artifact. Graph evidence is also produced by `graph-regression.yml` on pull
-requests.
+Release evidence is produced by the `release-evidence.yaml` workflow (which calls the
+canonical `NWarila/terraform-framework-template` reusable-release-evidence reusable) and
+uploaded as a GitHub Actions artifact.
 
 ## Where To Look
 
-In a workflow run, open the artifact named `release-evidence`. The bundle contains:
+In a workflow run, open the artifact named `release-evidence`. The bundle is produced by
+the canonical reusable; consult the reusable's source for the authoritative file list. At
+minimum, expect:
 
-- `summary.md`
-- `validate/terraform.validate.json`
-- `tests/terraform-test.json`
-- `graphs/*.plan.dot`
-- `graphs/*.plan.svg`
-- `graphs/*.cycles.json`
-- `graphs/*.summary.json`
-- `docs/docs-layout.txt`
-- `security/README.md`
-- `checksums.txt`
-
-## How To Read Cycle Reports
-
-Open each `*.cycles.json` file. A normal release should show:
-
-```json
-{
-  "cycle_count": 0,
-  "cycles": []
-}
-```
-
-Any cycle in a normal fixture blocks release. The educational failure-case example is not a
-normal release fixture.
-
-## How To Read Graph Summaries
-
-Open each `*.summary.json` file and check:
-
-- `fixture` names the expected local-source fixture.
-- `terraform_graph_type` is `plan`.
-- `nodes` and `edges` are non-zero.
-- `cycle_count` is `0`.
-- `generated_from` is `terraform graph -type=plan -draw-cycles`.
-
-Large unexpected changes to node or edge counts should be reviewed like a public contract
-change, even when no cycle exists.
+- a gate-results summary (`summary.md` or equivalent),
+- Terraform validate and test output,
+- a docs-layout snapshot,
+- a security scan summary,
+- a checksums manifest covering every other file in the bundle,
+- an SBOM and provenance attestation alongside the artifact upload.
 
 ## Release-Blocking Findings
 
 Block a release when:
 
-- any gate in `summary.md` is marked `fail`,
+- any gate in the evidence summary is marked `fail`,
 - Terraform validation or tests fail,
 - docs layout enforcement fails,
-- graph generation fails,
-- any normal fixture has cycles,
-- Trivy, Gitleaks, CodeQL, actionlint, or markdownlint report blocking findings,
+- Trivy, Gitleaks, CodeQL, actionlint, zizmor, or markdownlint report blocking findings,
 - evidence includes files that should never be published.
 
 ## Files That Must Never Be Included

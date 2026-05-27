@@ -5,6 +5,9 @@ name: Auto-Merge
 # never auto-merged. Renovate manages the SHA pin.
 
 on:
+  # zizmor: ignore[dangerous-triggers] auto-merge requires pull_request_target
+  # for write permissions on PRs from forks; the reusable does not check out
+  # PR head code.
   pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, labeled]
 
