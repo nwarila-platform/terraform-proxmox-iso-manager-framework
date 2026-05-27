@@ -23,6 +23,7 @@ ALLOWED_SUBTREES = {
 ADR_ROOT = DOCS / "decision-records"
 ADR_ALLOWED_SUBTREES = {
     ADR_ROOT / "org",
+    ADR_ROOT / "template",
     ADR_ROOT / "repo",
 }
 
@@ -60,7 +61,7 @@ def main() -> int:
             if md == ADR_ROOT / "README.md":
                 continue
             if not any(is_under(md, subtree) for subtree in ADR_ALLOWED_SUBTREES):
-                errors.append(f"{rel(md)} is an ADR outside docs/decision-records/org/ or repo/")
+                errors.append(f"{rel(md)} is an ADR outside docs/decision-records/org/, template/, or repo/")
 
     readme = DOCS / "README.md"
     if not readme.exists():

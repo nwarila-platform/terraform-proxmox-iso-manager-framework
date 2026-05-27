@@ -47,6 +47,8 @@
 !/docs/reference/golden-template-contract.md
 !/docs/reference/graph-artifacts.md
 !/docs/reference/production-readiness-handoff.md
+!/docs/reference/mirroring.md
+!/docs/reference/runner-protocol.md
 !/docs/reference/graphs/
 !/docs/reference/graphs/minimal.plan.svg
 !/docs/reference/graphs/minimal.summary.json
