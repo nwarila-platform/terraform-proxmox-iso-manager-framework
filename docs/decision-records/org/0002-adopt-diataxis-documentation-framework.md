@@ -13,7 +13,7 @@
 
 ## TL;DR
 
-We will use the [Diátaxis](https://diataxis.fr) documentation framework for all non-ADR documentation in repositories that adopt this baseline. Each adopting repository organizes long-form documentation into the four Diátaxis quadrants — **tutorials**, **how-to guides**, **reference**, and **explanation** — under a `docs/` directory whose immediate subdirectories mirror those quadrant names. ADRs themselves remain governed by [ADR-0001](0001-use-architecture-decision-records.md) and live in their own subtree at `docs/decision-records/{org,repo}/` (org-mirrored or repository-specific). This gives every repository a consistent, reader-first information architecture that is easy to navigate, easy to maintain, and easy for new contributors to understand.
+We will use the [Diátaxis](https://diataxis.fr) documentation framework for all non-ADR documentation in repositories that adopt this baseline. Each adopting repository organizes long-form documentation into the four Diátaxis quadrants — **tutorials**, **how-to guides**, **reference**, and **explanation** — under a `docs/` directory whose immediate subdirectories mirror those quadrant names. ADRs themselves remain governed by [ADR-0001](0001-use-architecture-decision-records.md) and live in their own subtree at `docs/decision-records/{org,template,repo}/` (org-mirrored or repository-specific). This gives every repository a consistent, reader-first information architecture that is easy to navigate, easy to maintain, and easy for new contributors to understand.
 
 ## Context and Problem Statement
 
@@ -55,7 +55,7 @@ The following forces shaped this decision:
 
 Chosen option: **Option 5, Diátaxis.**
 
-In a repository that adopts this baseline, all non-ADR documentation lives under `docs/` with subdirectories named exactly `tutorials/`, `how-to/`, `reference/`, and `explanation/`. Every Markdown file under those four subdirectories (other than an index `README.md`) lives in exactly one of them and is authored to one Diátaxis purpose. ADRs live in their own sibling subtree at `docs/decision-records/{org,repo}/` as established by ADR-0001 and are not subject to the Diátaxis quadrant rule.
+In a repository that adopts this baseline, all non-ADR documentation lives under `docs/` with subdirectories named exactly `tutorials/`, `how-to/`, `reference/`, and `explanation/`. Every Markdown file under those four subdirectories (other than an index `README.md`) lives in exactly one of them and is authored to one Diátaxis purpose. ADRs live in their own sibling subtree at `docs/decision-records/{org,template,repo}/` as established by ADR-0001 and are not subject to the Diátaxis quadrant rule.
 
 A repository is not required to populate every quadrant. A repository that has no learning-oriented onboarding need not create `docs/tutorials/`. A repository may begin by populating only the quadrants that solve current pain (commonly `docs/reference/` and `docs/how-to/`) and grow into the others over time. A repository's `docs/README.md` MAY serve as the index across populated quadrants and SHOULD label each linked document with its quadrant.
 
@@ -123,10 +123,11 @@ The directory name `docs/` is preferred over alternatives such as `documentation
 Adherence to this ADR is confirmed by the following mechanisms. The wording `MUST`, `SHOULD`, and `MAY` follows [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) conventions.
 
 1. **Layout check.** A repository that adopts this baseline MUST place all non-ADR documentation under `docs/`. Where any quadrant is populated, it MUST be in a top-level subdirectory named exactly `tutorials`, `how-to`, `reference`, or `explanation`. A CI script or `pre-commit` hook MAY fail a pull request that adds a Markdown file under `docs/` outside one of the four quadrant subdirectories.
-2. **Quadrant-purity check.** Each non-composite document under `docs/` SHOULD address exactly one Diátaxis quadrant. Composite operational documents (runbooks, troubleshooting guides) MAY span quadrants but MUST mark each section with its quadrant via an explicit second-level heading (`## Reference`, `## How to ...`, `## Why ...`).
-3. **Index check.** A repository's `docs/README.md`, if present, SHOULD link to every populated quadrant and SHOULD label each linked document with the quadrant it belongs to. A CI script MAY diff the directory listing against the index and fail on drift.
-4. **Co-existence check.** ADRs live at `docs/decision-records/{org,repo}/` (a sibling subtree, not a Diátaxis quadrant) and are not subject to the quadrant rule. A pull request that misfiles an ADR under one of the four quadrant directories SHOULD be rejected with a pointer to ADR-0001.
-5. **Editorial rule.** After acceptance of this ADR, document re-shelving (moving an existing doc into the appropriate quadrant) is editorial, not architectural; it does not require its own ADR. A material *change* to the framework choice — adopting a different framework, abandoning Diátaxis, or extending the quadrant taxonomy — does require a superseding ADR.
+2. **Layout-skeleton check.** Every adopting repository MUST contain all four quadrant directories — `docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/` — even when some are empty. Empty quadrants are kept in source control via byte-identical `.gitkeep` placeholders mirrored from the org canonical, so a reader scanning any repo immediately sees the same predictable layout. *Content* in each quadrant remains opt-in (a repo with no learning-oriented onboarding has an empty `tutorials/`); only the *layout* is mandatory.
+3. **Quadrant-purity check.** Each non-composite document under `docs/` SHOULD address exactly one Diátaxis quadrant. Composite operational documents (runbooks, troubleshooting guides) MAY span quadrants but MUST mark each section with its quadrant via an explicit second-level heading (`## Reference`, `## How to ...`, `## Why ...`).
+4. **Index check.** A repository's `docs/README.md`, if present, SHOULD link to every populated quadrant and SHOULD label each linked document with the quadrant it belongs to. A CI script MAY diff the directory listing against the index and fail on drift.
+5. **Co-existence check.** ADRs live at `docs/decision-records/{org,template,repo}/` (a sibling subtree, not a Diátaxis quadrant) and are not subject to the quadrant rule. A pull request that misfiles an ADR under one of the four quadrant directories SHOULD be rejected with a pointer to ADR-0001.
+6. **Editorial rule.** After acceptance of this ADR, document re-shelving (moving an existing doc into the appropriate quadrant) is editorial, not architectural; it does not require its own ADR. A material *change* to the framework choice — adopting a different framework, abandoning Diátaxis, or extending the quadrant taxonomy — does require a superseding ADR.
 
 Enforcement tooling is recommended but not mandatory at acceptance time. A solo-maintainer repository MAY rely on manual discipline; a team repository SHOULD automate at least the layout and index checks.
 
@@ -177,7 +178,7 @@ Pending. The first expected implementer is `github-terraform-framework`, which w
 
 ## Related ADRs
 
-- [ADR-0001](0001-use-architecture-decision-records.md) — establishes the ADR convention itself. ADR-0001 governs `docs/decision-records/{org,repo}/`; this ADR governs the rest of `docs/` (everywhere else).
+- [ADR-0001](0001-use-architecture-decision-records.md) — establishes the ADR convention itself. ADR-0001 governs `docs/decision-records/{org,template,repo}/`; this ADR governs the rest of `docs/` (everywhere else).
 
 ## Compliance Notes
 

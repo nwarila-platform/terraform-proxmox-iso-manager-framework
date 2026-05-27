@@ -1,2 +1,16 @@
-iso_file     = "${iso_file}"
-iso_checksum = "${iso_checksum}"
+boot_iso = {
+  iso_checksum         = "${iso_checksum}"
+  iso_file             = "${iso_file}"
+  iso_urls             = null
+  cd_label             = null
+  index                = 0
+  iso_download_pve     = false
+  iso_storage_pool     = null
+  iso_target_extension = null
+  iso_target_path      = null
+  keep_cdrom_device    = false
+  type                 = "scsi"
+  unmount              = true
+}
+
+additional_iso_files = []
