@@ -22,10 +22,10 @@ inherited from the organization's special `.github` repository.
   API.
 - Inputs that fail validation are rejected at `terraform plan` time, before any network
   call is made. Failed validation produces a clear error naming the failing input.
-- The module pins Terraform and providers to exact versions
-  ([org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md)),
-  so every consumer runs the exact CLI/provider build the maintainer tested with. Version
-  drift is not a vector here.
+- The module pins Terraform and providers to exact versions in
+  [`../../terraform/versions.tf`](../../terraform/versions.tf), so every consumer
+  runs the exact CLI/provider build the maintainer tested with. Version drift is
+  not a vector here.
 
 ## What this module does NOT guarantee
 
@@ -96,8 +96,8 @@ This module assumes the following adversaries:
   (commit-history secret scan), CodeQL (Actions analysis), and actionlint (workflow
   lint) on every push and PR.
 - GitHub Actions workflows are SHA-pinned per the org policy.
-- Terraform and provider versions are exact-pinned per
-  [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md).
+- Terraform and provider versions are exact-pinned in
+  [`../../terraform/versions.tf`](../../terraform/versions.tf).
 - Renovate (configured per [org ADR-0004](../decision-records/org/0004-use-renovate-for-dependency-updates.md))
   keeps SHA pins and version pins current with weekly PRs that the maintainer reviews
   and tests before merging.

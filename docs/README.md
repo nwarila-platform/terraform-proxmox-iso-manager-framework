@@ -9,7 +9,7 @@ This directory follows the [Diataxis](https://diataxis.fr) documentation framewo
 |---|---|---|
 | Tutorials | None currently shipped | This single-purpose module does not currently need a learning path. |
 | How-to | [Develop this module](how-to/develop-this-module.md), [Use from a Packer template](how-to/use-from-a-packer-template.md), [Generate Terraform graphs](how-to/generate-terraform-graphs.md), [Review release evidence](how-to/review-release-evidence.md), [Adopt this template](how-to/adopt-this-template.md) | You have a specific task to complete. |
-| Reference | [Terraform reference](reference/terraform.md), [Release gates](reference/release-gates.md), [Graph artifacts](reference/graph-artifacts.md), [Module invariants](reference/invariants.md), [Golden template contract](reference/golden-template-contract.md) | You need exact facts, schemas, gates, inputs, or outputs. |
+| Reference | [Terraform reference](reference/terraform.md), [Release gates](reference/release-gates.md), [Graph artifacts](reference/graph-artifacts.md), [Module invariants](reference/invariants.md), [Golden template contract](reference/golden-template-contract.md), [Production readiness handoff](reference/production-readiness-handoff.md) | You need exact facts, schemas, gates, inputs, outputs, or current handoff state. |
 | Explanation | [Architecture](explanation/architecture.md), [Threat model](explanation/threat-model.md), [Testing strategy](explanation/testing-strategy.md), [Dependency graph validation](explanation/dependency-graph-validation.md) | You want rationale, boundaries, or design context. |
 
 Tutorials are not currently shipped. Consumers of a narrow Terraform child module

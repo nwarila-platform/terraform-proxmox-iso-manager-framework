@@ -32,7 +32,7 @@ dispatch.
 | `security.yaml` | PR, push to `main`, merge queue, weekly, manual | Trivy and Gitleaks scans | Job-specific read plus SARIF upload |
 | `codeql.yaml` | PR, push to `main`, merge queue, weekly, manual | Static analysis for GitHub Actions | `contents: read`, `security-events: write`, `actions: read` |
 | `graph-regression.yml` | PR, manual | Terraform graph evidence and cycle detection | `contents: read` |
-| `org-adr-sync.yml` | PR touching org ADRs, weekly, manual | Verify mirrored org ADRs | `contents: read` |
+| `org-adr-sync.yaml` | PR, weekly, manual | Verify mirrored org ADRs | `contents: read` |
 | `release-please.yaml` | Push to `main` | Release PRs and GitHub releases | Write permissions required for release automation |
 | `release-evidence.yml` | Published release, tag push, manual | Release evidence artifact | `contents: read` |
 

@@ -22,4 +22,4 @@ jobs:
       contents: read
       security-events: write
       actions: read
-    uses: NWarila/terraform-template/.github/workflows/reusable-iac-security.yaml@7ce84506f03cfff4904923724bed9e42804e7644
+    uses: NWarila/terraform-framework-template/.github/workflows/reusable-iac-security.yaml@c885df7bd5cf9d1d5a4b3aabe1b1b9ced10e63b0
