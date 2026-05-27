@@ -48,15 +48,6 @@ The rejection tests are part of the security boundary. They cover:
   metacharacters.
 - Upload timeouts below 60 seconds or above 86400 seconds.
 
-## Graph And Cycle Checks
-
-The module's own graph is small, so graph evidence is generated from local-source consumer
-fixtures under [`../../tests/fixtures/`](../../tests/fixtures/). Those fixtures show the
-actual dependency shape a root module introduces when it consumes this child module.
-
-`tools/render_graphs.sh` generates DOT, SVG, validation JSON, cycle JSON, and summary JSON.
-`tools/tf_graph_cycles.py` fails if a strongly connected component or self-loop appears.
-
 ## Security Scans
 
 Security scans are not substitutes for Terraform tests. They are release gates that catch
