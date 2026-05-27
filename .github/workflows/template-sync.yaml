@@ -34,6 +34,6 @@ jobs:
         with:
           source-repo: NWarila/terraform-framework-template
           # renovate: depName=NWarila/terraform-framework-template packageName=NWarila/terraform-framework-template
-          source-ref: c885df7bd5cf9d1d5a4b3aabe1b1b9ced10e63b0 # main @ 2026-05-26
+          source-ref: dbf383819632c8bc1bbb9bbaef1cff2deccd0157 # main @ 2026-05-27 (slim manifest)
           manifest: baseline-manifest.json
           check-name: framework-template / verify
