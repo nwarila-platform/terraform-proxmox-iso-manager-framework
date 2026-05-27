@@ -29,42 +29,47 @@
 !/docs/decision-records/
 !/docs/decision-records/README.md
 !/docs/decision-records/org/
+!/docs/decision-records/org/.gitkeep
 !/docs/decision-records/org/0001-use-architecture-decision-records.md
 !/docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
 !/docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
 !/docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
+!/docs/decision-records/template/
+!/docs/decision-records/template/.gitkeep
 !/docs/decision-records/repo/
+!/docs/decision-records/repo/.gitkeep
 !/docs/decision-records/repo/0001-terraform-subdirectory-layout.md
 !/docs/decision-records/repo/0002-use-repo-local-renovate-baseline.md
 !/docs/decision-records/repo/0003-allow-example-local-readmes.md
 !/docs/decision-records/repo/0004-consume-terraform-template.md
 
 # Diataxis quadrants.
+!/docs/tutorials/
+!/docs/tutorials/.gitkeep
+
 !/docs/reference/
+!/docs/reference/.gitkeep
 !/docs/reference/terraform.md
 !/docs/reference/release-gates.md
 !/docs/reference/invariants.md
-!/docs/reference/golden-template-contract.md
-!/docs/reference/graph-artifacts.md
 !/docs/reference/production-readiness-handoff.md
 !/docs/reference/mirroring.md
 !/docs/reference/runner-protocol.md
-!/docs/reference/graphs/
-!/docs/reference/graphs/minimal.plan.svg
-!/docs/reference/graphs/minimal.summary.json
+!/docs/reference/architecture-review.md
+!/docs/reference/file-audit.md
 
 !/docs/how-to/
+!/docs/how-to/.gitkeep
 !/docs/how-to/use-from-a-packer-template.md
 !/docs/how-to/develop-this-module.md
 !/docs/how-to/adopt-this-template.md
-!/docs/how-to/generate-terraform-graphs.md
 !/docs/how-to/review-release-evidence.md
 
 !/docs/explanation/
+!/docs/explanation/.gitkeep
 !/docs/explanation/architecture.md
 !/docs/explanation/threat-model.md
 !/docs/explanation/testing-strategy.md
-!/docs/explanation/dependency-graph-validation.md
 
 # ----- [ Runnable examples ] ----------------------------------------------------------------------
 
@@ -84,11 +89,6 @@
 !/examples/adoption-recovery/
 !/examples/adoption-recovery/README.md
 !/examples/adoption-recovery/main.tf
-
-!/examples/failure-cases/
-!/examples/failure-cases/dependency-cycle/
-!/examples/failure-cases/dependency-cycle/README.md
-!/examples/failure-cases/dependency-cycle/main.tf
 
 # ----- [ Local CI fixtures ] ----------------------------------------------------------------------
 
@@ -117,10 +117,6 @@
 !/tools/
 !/tools/check_docs_layout.py
 !/tools/install_ci_tools.sh
-!/tools/render_graphs.sh
-!/tools/tf_graph_cycles.py
-!/tools/tf_graph_summary.py
-!/tools/generate_release_evidence.sh
 
 # ----- [ Release automation ] ---------------------------------------------------------------------
 
