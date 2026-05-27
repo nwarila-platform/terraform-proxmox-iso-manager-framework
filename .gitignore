@@ -33,11 +33,11 @@
 !/docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
 !/docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
 !/docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
-!/docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md
 !/docs/decision-records/repo/
 !/docs/decision-records/repo/0001-terraform-subdirectory-layout.md
 !/docs/decision-records/repo/0002-use-repo-local-renovate-baseline.md
 !/docs/decision-records/repo/0003-allow-example-local-readmes.md
+!/docs/decision-records/repo/0004-consume-terraform-template.md
 
 # Diataxis quadrants.
 !/docs/reference/
@@ -46,6 +46,7 @@
 !/docs/reference/invariants.md
 !/docs/reference/golden-template-contract.md
 !/docs/reference/graph-artifacts.md
+!/docs/reference/production-readiness-handoff.md
 !/docs/reference/graphs/
 !/docs/reference/graphs/minimal.plan.svg
 !/docs/reference/graphs/minimal.summary.json
@@ -113,6 +114,7 @@
 
 !/tools/
 !/tools/check_docs_layout.py
+!/tools/install_ci_tools.sh
 !/tools/render_graphs.sh
 !/tools/tf_graph_cycles.py
 !/tools/tf_graph_summary.py

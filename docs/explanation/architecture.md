@@ -14,7 +14,7 @@ evidence, release evidence, and ADR-governed documentation.
 | Consumer repository | Owns provider configuration, backend configuration, credentials, Packer builder settings, and the reviewed ISO pin. |
 | This module | Validates the pin, asks Proxmox to download the ISO, requires SHA-256 verification, and emits Packer-facing outputs. |
 | Proxmox VE | Performs the download-url operation, stores the ISO in the selected datastore, and reports the managed file state back to Terraform. |
-| Packer template repo | Renders `iso_path` and `iso_sha256` into the `boot_iso` object expected by [`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework). |
+| Packer template repo | Renders `iso_path` and `iso_sha256` into the `boot_iso` object and empty `additional_iso_files` list expected by [`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework). |
 
 ```text
 consumer repo
@@ -40,6 +40,8 @@ Packer consumer (proxmox-packer-framework)
     iso_file     = module.iso.iso_path
     ...
   }
+
+  additional_iso_files = []
 ```
 
 ## ISO Pin Flow

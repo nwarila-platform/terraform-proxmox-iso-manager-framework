@@ -13,10 +13,10 @@ Terraform child module for one job: manage one Proxmox VE installer ISO from a
 Git-tracked pin containing `url`, `sha256`, and `filename`.
 
 The module turns that pin into a SHA-verified Proxmox ISO path such as
-`cephFS:iso/Rocky-9.6-x86_64-dvd.iso`, which Packer template repositories render into a
-`boot_iso` object matching the
+`cephFS:iso/Rocky-9.6-x86_64-dvd.iso`, which Packer template repositories render into
+`boot_iso` and `additional_iso_files` pkrvars matching the
 [`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
-`boot_iso` variable type.
+variable types.
 
 ## What this demonstrates
 
@@ -75,9 +75,13 @@ output "boot_iso" {
     unmount              = true
   }
 }
+
+output "additional_iso_files" {
+  value = []
+}
 ```
 
-The object above matches the `boot_iso` variable type declared by
+The outputs above match the `boot_iso` and `additional_iso_files` variable types declared by
 [`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
 and is intended to be rendered into an auto-loaded `*.auto.pkrvars.hcl` file via
 `templatefile()` and `local_file`. See

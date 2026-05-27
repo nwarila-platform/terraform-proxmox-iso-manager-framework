@@ -1,5 +1,5 @@
 name: Auto-Merge
-# Caller for nwarila/terraform-template reusable-auto-merge workflow.
+# Caller for NWarila/terraform-framework-template reusable-auto-merge workflow.
 # Enables GitHub auto-merge on trusted-bot PRs (Renovate, template-sync,
 # release-please) once required status checks pass. Human-authored PRs are
 # never auto-merged. Renovate manages the SHA pin.
@@ -21,4 +21,4 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: NWarila/terraform-template/.github/workflows/reusable-auto-merge.yaml@5a9279e0514ab054d89430a4453409213f9f351f
+    uses: NWarila/terraform-framework-template/.github/workflows/reusable-auto-merge.yaml@c885df7bd5cf9d1d5a4b3aabe1b1b9ced10e63b0

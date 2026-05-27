@@ -2,10 +2,10 @@
 
 Shows the intended handoff after starting from
 [`../minimal/`](../minimal/): Terraform pins, downloads, and verifies the ISO on Proxmox,
-then emits a `boot_iso` object that a Packer template repository writes into an
-auto-loaded pkrvars file (e.g. `iso.auto.pkrvars.hcl`).
+then emits a `boot_iso` object and an empty `additional_iso_files` list that a Packer
+template repository writes into an auto-loaded pkrvars file (e.g. `iso.auto.pkrvars.hcl`).
 
-The shape of the emitted object matches the `boot_iso` variable type declared by
+The shape of the emitted data matches the `boot_iso` and `additional_iso_files` variables declared by
 [`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
 in `packer/variables.pkr.hcl`. The example pre-populates ISO-lifecycle fields from this
 module's outputs and defaults the consumer-policy fields (`type`, `index`, `unmount`,

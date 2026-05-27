@@ -2,7 +2,7 @@
   // Schema for editor validation. Update only when intentionally adopting a new schema.
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
 
-  // Renovate config for nwarila/terraform-template and (after sync) every
+  // Renovate config for NWarila/terraform-framework-template and (after sync) every
   // consumer. Universal across the fleet so that the same Renovate behavior
   // applies in every Terraform repository under nwarila and nwarila-platform.
   //
@@ -70,8 +70,8 @@
       "semanticCommitScope": "deps"
     },
     {
-      "matchDepNames": ["NWarila/terraform-template"],
-      "groupName": "terraform-template",
+      "matchDepNames": ["NWarila/terraform-framework-template"],
+      "groupName": "terraform-framework-template",
       "semanticCommitType": "chore",
       "semanticCommitScope": "deps",
       "automerge": false

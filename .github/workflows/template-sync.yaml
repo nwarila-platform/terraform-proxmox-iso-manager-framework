@@ -1,22 +1,39 @@
 name: Template Sync
-# Caller for nwarila/terraform-template reusable-template-sync workflow.
-# Renovate manages the SHA pin (both `uses:` and `template_ref:`).
+# Detects drift between this consumer and the canonical
+# NWarila/terraform-framework-template baseline manifest. Uses the
+# NWarila/drift-gate action (same pattern as the framework template's own
+# drift-gate.yaml against NWarila/.github).
+#
+# Detection-only: this workflow does not open sync PRs. Trigger is schedule
+# plus workflow_dispatch; pull_request gating will be added after the
+# missing baseline-manifest.json files are backfilled into this consumer
+# (tracked in docs/reference/production-readiness-handoff.md).
 
 on:
   schedule:
-    - cron: "17 6 * * *"
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  checks: write
 
 concurrency:
-  group: template-sync
+  group: template-sync-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  sync:
-    uses: NWarila/terraform-template/.github/workflows/reusable-template-sync.yaml@5a9279e0514ab054d89430a4453409213f9f351f
-    with:
-      template_ref: 5a9279e0514ab054d89430a4453409213f9f351f
+  baseline:
+    name: framework-template / verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Drift gate (framework-template baseline)
+        # renovate: datasource=git-refs depName=NWarila/drift-gate
+        uses: NWarila/drift-gate@dd091e7d730b2711e09bf86c8d66b7e9b873dd53 # main @ 2026-05-26
+        with:
+          source-repo: NWarila/terraform-framework-template
+          # renovate: depName=NWarila/terraform-framework-template packageName=NWarila/terraform-framework-template
+          source-ref: c885df7bd5cf9d1d5a4b3aabe1b1b9ced10e63b0 # main @ 2026-05-26
+          manifest: baseline-manifest.json
+          check-name: framework-template / verify

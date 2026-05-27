@@ -26,3 +26,8 @@ output "boot_iso" {
     unmount              = true
   }
 }
+
+output "additional_iso_files" {
+  description = "Additional ISO file objects for proxmox-packer-framework. Empty because this module owns only the boot ISO."
+  value       = []
+}

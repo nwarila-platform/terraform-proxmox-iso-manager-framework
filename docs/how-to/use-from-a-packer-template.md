@@ -11,9 +11,8 @@ and SHA-verify a single ISO; the calling Terraform configuration emits a Packer
 - A storage datastore on Proxmox with ISO content type enabled (e.g. `cephFS`, `local`).
 - A Proxmox API token with the privileges required by `proxmox_download_file`.
 - The exact Terraform version pinned in [`../../terraform/versions.tf`](../../terraform/versions.tf).
-  Use `tfenv` or `asdf` if you manage multiple versions on one workstation. Per
-  [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md),
-  any other Terraform version causes `terraform init` to fail.
+  Use `tfenv` or `asdf` if you manage multiple versions on one workstation.
+  Any other Terraform version causes `terraform init` to fail.
 
 ## Step 1: Pin the module in your Terraform configuration
 
@@ -51,8 +50,8 @@ rejected because Terraform outputs and state include the echoed `iso_url` for pr
 
 ## Step 2: Emit a Packer pkrvars.hcl file
 
-Render the module's flat outputs into a `boot_iso` object literal that matches the
-typed `boot_iso` variable declared by
+Render the module's flat outputs into a `boot_iso` object literal and an
+`additional_iso_files` list that match the typed variables declared by
 [`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
 in `packer/variables.pkr.hcl`. Auto-loaded pkrvars files (`*.auto.pkrvars.hcl`) are the
 recommended carrier.
@@ -75,6 +74,8 @@ resource "local_file" "packer_vars" {
       type                 = "scsi"
       unmount              = true
     }
+
+    additional_iso_files = []
   EOT
 }
 ```
@@ -84,7 +85,8 @@ expects in `boot_iso.iso_file`. The ISO-lifecycle fields (`iso_checksum`, `iso_f
 `iso_urls`, `iso_download_pve`, `iso_storage_pool`, `iso_target_*`) are fixed by this
 module's contract; the consumer-policy fields (`cd_label`, `index`, `keep_cdrom_device`,
 `type`, `unmount`) default to the values used by the proxmox-packer-framework examples
-and should be overridden in your consumer repo when needed.
+and should be overridden in your consumer repo when needed. `additional_iso_files` is
+empty because this module manages one boot ISO and no secondary ISO attachments.
 
 ## Step 3: Apply Terraform, then run Packer
 
@@ -129,8 +131,7 @@ When this module ships a new version:
 ## Troubleshooting
 
 - **`terraform init` fails with a required Terraform version error**: install the exact
-  Terraform version pinned by the module. This is intentional - see
-  [org ADR-0005](../decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md).
+  Terraform version pinned by the module in [`../../terraform/versions.tf`](../../terraform/versions.tf).
 - **`proxmox_download_file` fails with checksum mismatch**: the SHA in `iso_pin` does
   not match the upstream file. Either upstream changed the file (in which case re-fetch
   the SHA) or the URL is serving something different than expected. The integrity check

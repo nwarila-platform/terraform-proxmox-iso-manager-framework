@@ -1,8 +1,18 @@
 name: Release Please
-# Caller for nwarila/terraform-template reusable-release-please workflow.
-# Renovate manages the SHA pin. The reusable always dispatches
-# release-evidence.yaml on every release; no per-repo configuration is
-# needed.
+# Native release-please integration. Runs on every push to main.
+# release-please-action creates and maintains a release PR; on merge of that
+# PR, it tags + publishes the GitHub release. Because GITHUB_TOKEN-driven
+# events do not cascade, this workflow explicitly dispatches
+# release-evidence.yaml via gh CLI (workflow_dispatch is exempt from the
+# cascade restriction) so the new tag gets a uniform evidence bundle.
+#
+# This workflow is intentionally NOT a caller for any reusable workflow:
+# NWarila/terraform-framework-template/reusable-release-please dispatches
+# `release.yaml` with `task=release-evidence`, but this repo's evidence
+# entrypoint is `release-evidence.yaml`. Adopting that reusable requires
+# renaming the evidence workflow and adding a `task` workflow_dispatch
+# input; until that migration lands, this native form is the working
+# release pipeline.
 
 on:
   push:
@@ -17,10 +27,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write
       issues: write
       actions: write
-    uses: NWarila/terraform-template/.github/workflows/reusable-release-please.yaml@5a9279e0514ab054d89430a4453409213f9f351f
+
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # release-please publishes the GitHub release using GITHUB_TOKEN, and
+      # GITHUB_TOKEN-driven events do not cascade to other workflows.
+      # workflow_dispatch IS exempt from that cascade restriction.
+      - name: Dispatch release-evidence
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Pass workflow expansions through env vars to avoid template
+          # injection (zizmor template-injection finding). Values are
+          # producer-controlled (release-please outputs / GitHub context),
+          # but routing via env preserves the principle and silences the
+          # audit cleanly.
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run release-evidence.yaml --ref "$TAG_NAME" --repo "$REPOSITORY"
