@@ -51,27 +51,51 @@ rejected because Terraform outputs and state include the echoed `iso_url` for pr
 
 ## Step 2: Emit a Packer pkrvars.hcl file
 
+Render the module's flat outputs into a `boot_iso` object literal that matches the
+typed `boot_iso` variable declared by
+[`nwarila-platform/proxmox-packer-framework`](https://github.com/nwarila-platform/proxmox-packer-framework)
+in `packer/variables.pkr.hcl`. Auto-loaded pkrvars files (`*.auto.pkrvars.hcl`) are the
+recommended carrier.
+
 ```hcl
 resource "local_file" "packer_vars" {
-  filename = "${path.root}/build.pkrvars.hcl"
+  filename = "${path.root}/iso.auto.pkrvars.hcl"
   content  = <<-EOT
-    iso_file       = "${module.iso.iso_path}"
-    iso_checksum   = "sha256:${module.iso.iso_sha256}"
-    proxmox_node   = "${module.iso.node}"
+    boot_iso = {
+      iso_checksum         = "sha256:${module.iso.iso_sha256}"
+      iso_file             = "${module.iso.iso_path}"
+      iso_urls             = null
+      cd_label             = null
+      index                = 0
+      iso_download_pve     = false
+      iso_storage_pool     = null
+      iso_target_extension = null
+      iso_target_path      = null
+      keep_cdrom_device    = false
+      type                 = "scsi"
+      unmount              = true
+    }
   EOT
 }
 ```
 
-`module.iso.iso_path` is the `<storage>:iso/<filename>` form that Proxmox's Packer
-plugin expects directly.
+`module.iso.iso_path` is the `<storage>:iso/<filename>` form that the proxmox-packer-framework
+expects in `boot_iso.iso_file`. The ISO-lifecycle fields (`iso_checksum`, `iso_file`,
+`iso_urls`, `iso_download_pve`, `iso_storage_pool`, `iso_target_*`) are fixed by this
+module's contract; the consumer-policy fields (`cd_label`, `index`, `keep_cdrom_device`,
+`type`, `unmount`) default to the values used by the proxmox-packer-framework examples
+and should be overridden in your consumer repo when needed.
 
 ## Step 3: Apply Terraform, then run Packer
 
 ```bash
 terraform init
 terraform apply
-packer build -var-file=build.pkrvars.hcl proxmox-template.pkr.hcl
+packer build proxmox-template.pkr.hcl
 ```
+
+Packer auto-loads any `*.auto.pkrvars.hcl` file in the working directory, so `iso.auto.pkrvars.hcl`
+is consumed without an explicit `-var-file` flag.
 
 The first `terraform apply` downloads the ISO and SHA-verifies it server-side. Subsequent
 applies with the same `iso_pin` are no-ops. Bumping any field of `iso_pin` triggers a
@@ -89,7 +113,7 @@ When upstream releases a new ISO version:
 3. Commit the change. The git history of your `iso_pin` assignment **is** the long-lived
    audit trail of which ISOs your build has consumed over time.
 4. Run `terraform apply` to download and SHA-verify the new ISO.
-5. Run `packer build` against the regenerated `build.pkrvars.hcl` to produce the new
+5. Run `packer build` against the regenerated `iso.auto.pkrvars.hcl` to produce the new
    Packer template.
 
 ## Bumping the module itself
