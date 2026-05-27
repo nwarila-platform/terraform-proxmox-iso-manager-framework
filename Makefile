@@ -25,9 +25,6 @@ docs:
 docs-diff:
 	terraform-docs --config .terraform-docs.yml --output-check terraform
 
-graph:
-	bash tools/render_graphs.sh
-
 docs-check:
 	$(PYTHON) tools/check_docs_layout.py
 

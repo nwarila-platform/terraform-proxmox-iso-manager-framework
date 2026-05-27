@@ -1,8 +1,11 @@
 name: Org ADR Sync
-# Verifies that org-baseline ADRs mirrored under docs/decision-records/org/
-# match the canonical nwarila-platform/.github copies. This is intentionally
-# self-contained until nwarila-platform/.github publishes a reusable ADR sync
-# workflow.
+# Verifies that org-baseline files (ADR mirrors + Diataxis .gitkeep markers)
+# match the canonical nwarila-platform/.github copies. Uses the canonical
+# NWarila/drift-gate composite action against
+# nwarila-platform/.github/baseline-manifest.json.
+#
+# Mirrors the template-sync.yaml pattern; only the source-repo + source-ref
+# differ.
 
 on:
   pull_request:
@@ -13,108 +16,24 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: org-adr-sync-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: verify org ADR mirror
-    runs-on: ubuntu-latest
+  baseline:
+    name: org-baseline / verify
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
-    permissions:
-      contents: read
-    env:
-      ORG_ADR_SOURCE_REPO: nwarila-platform/.github
-      ORG_ADR_SOURCE_REF: 8e890d1f41fc2e4fb6162af13729ca1dfd232dd7
     steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Drift gate (nwarila-platform/.github baseline)
+        # renovate: datasource=git-refs depName=NWarila/drift-gate
+        uses: NWarila/drift-gate@dd091e7d730b2711e09bf86c8d66b7e9b873dd53 # main @ 2026-05-26
         with:
-          persist-credentials: false
-
-      - name: Verify mirrored org ADRs
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python3 <<'PY'
-          from __future__ import annotations
-
-          import difflib
-          import json
-          import os
-          import sys
-          import urllib.request
-          from pathlib import Path
-
-          repo = os.environ["ORG_ADR_SOURCE_REPO"]
-          ref = os.environ["ORG_ADR_SOURCE_REF"]
-          api_url = (
-              f"https://api.github.com/repos/{repo}/contents/"
-              f"docs/decision-records?ref={ref}"
-          )
-
-          request = urllib.request.Request(
-              api_url,
-              headers={
-                  "Accept": "application/vnd.github+json",
-                  "X-GitHub-Api-Version": "2022-11-28",
-              },
-          )
-          with urllib.request.urlopen(request, timeout=30) as response:
-              entries = json.load(response)
-
-          adr_files = sorted(
-              entry["name"]
-              for entry in entries
-              if entry.get("type") == "file"
-              and entry["name"].endswith(".md")
-              and entry["name"] != "README.md"
-          )
-          if not adr_files:
-              print("::error::no upstream org ADRs found")
-              sys.exit(1)
-
-          local_dir = Path("docs/decision-records/org")
-          local_files = sorted(path.name for path in local_dir.glob("*.md"))
-          extra_files = [name for name in local_files if name not in adr_files]
-
-          failed = False
-          for name in extra_files:
-              print(f"::error file={local_dir / name}::extra local org ADR has no upstream master")
-              failed = True
-
-          for name in adr_files:
-              local_path = local_dir / name
-              if not local_path.is_file():
-                  print(f"::error file={local_path}::missing mirrored org ADR")
-                  failed = True
-                  continue
-
-              raw_url = (
-                  f"https://raw.githubusercontent.com/{repo}/{ref}/"
-                  f"docs/decision-records/{name}"
-              )
-              with urllib.request.urlopen(raw_url, timeout=30) as response:
-                  upstream = response.read().decode("utf-8").splitlines(keepends=True)
-              local = local_path.read_text(encoding="utf-8").splitlines(keepends=True)
-
-              if upstream != local:
-                  print(f"::error file={local_path}::mirrored org ADR differs from upstream")
-                  sys.stdout.writelines(
-                      difflib.unified_diff(
-                          upstream,
-                          local,
-                          fromfile=f"{repo}@{ref}/docs/decision-records/{name}",
-                          tofile=str(local_path),
-                      )
-                  )
-                  failed = True
-
-          if failed:
-              sys.exit(1)
-
-          print(f"verified {len(adr_files)} org ADR mirror file(s) at {ref}")
-          PY
+          source-repo: nwarila-platform/.github
+          # renovate: depName=nwarila-platform/.github packageName=nwarila-platform/.github
+          source-ref: 8e890d1f41fc2e4fb6162af13729ca1dfd232dd7
+          manifest: baseline-manifest.json
+          check-name: org-baseline / verify
