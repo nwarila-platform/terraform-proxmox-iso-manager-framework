@@ -61,15 +61,18 @@ Mechanics:
   `reusable-*.yaml` from the template at a SHA pin. The pins are grouped by
   Renovate under `terraform-framework-template` so all callers bump
   together. Callers covered: `codeql.yaml`, `scorecard.yaml`, `security.yaml`,
-  `release-evidence.yaml`, `auto-merge.yaml`. `release-please.yaml` currently
-  runs `release-please-action` natively (rather than via the
-  `reusable-release-please.yaml`) because that reusable dispatches a single
-  `release.yaml` entrypoint and this repo's entrypoint is
-  `release-evidence.yaml`; migrating requires a workflow rename + a `task`
-  workflow_dispatch input.
-- `pr-validation.yaml` runs `make ci` natively on `ubuntu-latest` after
-  installing pinned CI tools via `tools/install_ci_tools.sh`. The same
-  `make ci` runs locally without any network round-trip to the template.
+  `auto-merge.yaml`, and the `release.yaml` consolidated workflow.
+- `release.yaml` follows the canonical task-dispatch pattern: on push to
+  `main` (gated by repo variable `RELEASE_PLEASE_ON_PUSH=true`) it calls
+  `reusable-release-please`; on `release.published` (or explicit
+  `workflow_dispatch` with `task=release-evidence`) it calls
+  `reusable-release-evidence` with `repo_type=framework`. This replaces
+  the previous split where `release-please.yaml` invoked
+  `release-please-action` natively and explicitly dispatched a separate
+  `release-evidence.yaml`.
+- `ci.yaml` runs `make ci` natively on `ubuntu-24.04` after installing
+  pinned CI tools via `tools/install_ci_tools.sh`. The same `make ci` runs
+  locally without any network round-trip to the template.
 - `template-sync.yaml` calls the canonical `NWarila/drift-gate` composite
   action against `NWarila/terraform-framework-template@<SHA>` with
   `manifest: baseline-manifest.json`. It reports byte-level drift via
@@ -120,8 +123,8 @@ Mechanics:
 - `template-sync.yaml` runs `NWarila/drift-gate` against the template's
   `baseline-manifest.json` on a weekly schedule and on `workflow_dispatch`,
   reporting drift via check-run annotations.
-- `pr-validation.yaml` runs `make ci` on every PR; the same gates run
-  locally via `make ci`.
+- `ci.yaml` runs `make ci` on every PR; the same gates run locally via
+  `make ci`.
 - The `terraform-framework-template` SHA appears in every caller workflow's
   `uses:` reference with a Renovate `# renovate:` annotation; pin freshness
   is therefore observable through Renovate's PR queue.

@@ -3,7 +3,7 @@
 Every release should leave behind enough evidence for a reviewer to understand what was
 validated and what would have blocked publication.
 
-PR-time gates run via `make ci` in `pr-validation.yaml`:
+PR-time gates run via `make ci` in `ci.yaml`:
 
 | Gate | Tool | Blocks PR? | Notes |
 |---|---|---|---|
@@ -19,27 +19,28 @@ PR-time gates run via `make ci` in `pr-validation.yaml`:
 Security gates run in `security.yaml` (Trivy, Gitleaks, zizmor) and `codeql.yaml`
 (CodeQL Actions analysis); supply-chain signals come from `scorecard.yaml`.
 
-Release evidence is produced by `release-evidence.yaml`, which invokes the canonical
-`NWarila/terraform-framework-template` reusable-release-evidence reusable with
-`repo_type: framework`. See [`docs/how-to/review-release-evidence.md`](../how-to/review-release-evidence.md)
+Release evidence is produced by `release.yaml`'s `evidence` job, which invokes the
+canonical `NWarila/terraform-framework-template` reusable-release-evidence reusable
+with `repo_type: framework`. See [`docs/how-to/review-release-evidence.md`](../how-to/review-release-evidence.md)
 for the artifact contract.
 
-Release Please publishes release notes and tags after qualifying merges to `main`.
-`release-please.yaml` explicitly dispatches `release-evidence.yaml` after each
-release, since `GITHUB_TOKEN`-driven events do not cascade automatically.
+Release Please publishes release notes and tags. `release.yaml`'s `release-please`
+job invokes the canonical `reusable-release-please` reusable, which dispatches
+`release.yaml` back with `task=release-evidence` after publishing a release
+(GITHUB_TOKEN-driven `workflow_dispatch` is exempt from the no-cascade rule).
+Push-triggered runs require repo variable `RELEASE_PLEASE_ON_PUSH=true`.
 
 ## Workflow Control Plane
 
 | Workflow | Trigger | Purpose | Permission baseline |
 | --- | --- | --- | --- |
-| `pr-validation.yaml` | PR, push to `main`, merge queue, manual | Terraform, docs, lint, and OPA gates via `make ci` | `contents: read` |
+| `ci.yaml` | PR, push to `main`, merge queue, manual | Terraform, docs, lint, and OPA gates via `make ci` | `contents: read` |
 | `security.yaml` | PR, push to `main`, merge queue, weekly, manual | Trivy, Gitleaks, and zizmor scans | Job-specific read plus SARIF upload |
 | `codeql.yaml` | PR, push to `main`, merge queue, weekly, manual | Static analysis for GitHub Actions | `contents: read`, `security-events: write`, `actions: read` |
 | `scorecard.yaml` | Push to `main`, weekly, manual | OpenSSF Scorecard | `id-token: write`, `actions: read`, `contents: read` |
-| `org-adr-sync.yaml` | Weekly, manual | Verify mirrored org ADRs against `nwarila-platform/.github` | `contents: read` |
+| `org-adr-sync.yaml` | PR, weekly, manual | Verify org-baseline drift against `nwarila-platform/.github` via `NWarila/drift-gate` | `contents: read`, `checks: write` |
 | `template-sync.yaml` | Weekly, manual | Detect baseline drift against `NWarila/terraform-framework-template` via `NWarila/drift-gate` | `contents: read`, `checks: write` |
-| `release-please.yaml` | Push to `main` | Release PRs and GitHub releases; dispatches `release-evidence.yaml` on release | Write permissions required for release automation |
-| `release-evidence.yaml` | Release published, manual dispatch | Release evidence artifact | `contents: write`, `attestations: write`, `id-token: write` |
+| `release.yaml` | Push to `main` (gated by `RELEASE_PLEASE_ON_PUSH`), `release.published`, manual dispatch with `task` choice | Release PRs + tags via `reusable-release-please`; evidence bundle via `reusable-release-evidence` | Per-job: release-please needs write on contents/PRs/issues/actions; evidence needs write on contents/attestations and `id-token: write` |
 | `auto-merge.yaml` | `pull_request_target` | Auto-merge trusted-bot PRs once required checks pass | `contents: write`, `pull-requests: write` |
 
 ## Artifact Rules

@@ -1,0 +1,62 @@
+name: Release
+
+# Single release entrypoint following the canonical NWarila/terraform-framework-template
+# pattern. release-please runs on push to main (gated by repo variable
+# RELEASE_PLEASE_ON_PUSH for safe template adoption); on release published
+# (or explicit workflow_dispatch with task=release-evidence), the evidence
+# bundle is generated and attached.
+#
+# The canonical reusable-release-please.yaml dispatches `release.yaml` with
+# task=release-evidence after creating a release; GITHUB_TOKEN-driven
+# workflow_dispatch is exempt from the no-cascade rule.
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Release task to run.
+        required: true
+        type: choice
+        default: release-please
+        options:
+          - release-please
+          - release-evidence
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    # Push-triggered release-please needs the repository setting that allows
+    # GitHub Actions to create pull requests. The repository variable
+    # RELEASE_PLEASE_ON_PUSH must be set to 'true' for this branch to publish
+    # releases on push; otherwise only explicit workflow_dispatch fires this.
+    if: ${{ (github.event_name == 'push' && vars.RELEASE_PLEASE_ON_PUSH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-please') }}
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    uses: NWarila/terraform-framework-template/.github/workflows/reusable-release-please.yaml@efcf3274d8bc6f4b192be063db8f284db6d9423a
+
+  evidence:
+    name: Release Evidence
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-evidence') }}
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    uses: NWarila/terraform-framework-template/.github/workflows/reusable-release-evidence.yaml@efcf3274d8bc6f4b192be063db8f284db6d9423a
+    with:
+      # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
+      terraform_version: "1.15.2"
+      repo_type: framework

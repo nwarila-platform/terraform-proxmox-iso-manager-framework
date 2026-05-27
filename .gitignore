@@ -130,15 +130,14 @@
 !/.github/PULL_REQUEST_TEMPLATE.md
 !/.github/renovate.json5
 !/.github/workflows/
-!/.github/workflows/codeql.yaml
-!/.github/workflows/pr-validation.yaml
-!/.github/workflows/release-please.yaml
 !/.github/workflows/auto-merge.yaml
-!/.github/workflows/release-evidence.yaml
+!/.github/workflows/ci.yaml
+!/.github/workflows/codeql.yaml
 !/.github/workflows/org-adr-sync.yaml
+!/.github/workflows/release.yaml
+!/.github/workflows/scorecard.yaml
 !/.github/workflows/security.yaml
 !/.github/workflows/template-sync.yaml
-!/.github/workflows/scorecard.yaml
 
 # ----- [ Terraform module sources and tests ] -----------------------------------------------------
 
