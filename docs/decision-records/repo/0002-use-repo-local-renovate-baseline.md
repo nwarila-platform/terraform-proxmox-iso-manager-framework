@@ -1,9 +1,9 @@
-# ADR-0002: Use a Repo-Local Renovate Baseline Until Org Preset Exists
+# ADR-0002: Extend the Framework-Template Renovate Preset
 
 | Field          | Value                                    |
 | -------------- | ---------------------------------------- |
-| Status         | Accepted                                 |
-| Date           | 2026-05-05                               |
+| Status         | Accepted (supersedes the previous local-baseline decision) |
+| Date           | 2026-05-27                               |
 | Authors        | Nick Warila (@NWarila)                   |
 | Decision-maker | Nick Warila (sole portfolio maintainer)  |
 | Consulted      | None.                                    |
@@ -13,98 +13,170 @@
 
 ## TL;DR
 
-This repository keeps the effective Renovate policy directly in `.github/renovate.json5`
-instead of extending `github>nwarila-platform/.github`. The org-wide ADR-0004 pattern is
-still the desired end-state, but the special `.github` repository does not currently publish
-the shared Renovate preset. A local baseline is safer than a config that looks centralized
-but cannot be resolved by Renovate.
+This repository's `.github/renovate.json5` extends the canonical preset published
+by `NWarila/terraform-framework-template`. The local file keeps only repo-specific
+package grouping; stack-wide Renovate policy (digest pinning, exact terraform
+pins, supply-chain quarantine, custom `# renovate:` annotation managers,
+schedule, etc.) lives upstream and is inherited automatically.
+
+This supersedes the previous decision (recorded in the original version of this
+ADR) to inline a full local baseline. That decision was correct at the time —
+`nwarila-platform/.github` did not publish a working preset, and inlining was
+safer than extending a missing artifact. The framework-template now publishes a
+working preset, so the original blocker is gone and the org ADR-0004 pattern
+becomes viable directly.
 
 ## Context and Problem Statement
 
-Org ADR-0004 standardizes Renovate and expects adopting repositories to inherit a shared
-baseline from `nwarila-platform/.github`. During this repository review, the public special
-`.github` repository did not contain the referenced `.github/renovate.json5` preset. Keeping
-`extends: ["github>nwarila-platform/.github"]` here made dependency automation depend on a
-missing artifact.
+Org ADR-0004 standardizes Renovate across the portfolio and expects consumers
+to inherit a shared baseline. The original ADR-0002 deferred this because the
+referenced preset did not exist. As of `NWarila/terraform-framework-template`
+SHA `efcf3274` (2026-05-27), the framework template publishes a complete
+Renovate preset at `.github/renovate.json5` that encodes:
+
+- `pinDigests: true` for `github-actions` (SHA pinning)
+- `rangeStrategy: "pin"` for `terraform` (exact module + provider pins)
+- A `customManagers` regex that tracks `# renovate: datasource=…` annotations
+  in workflow inputs and shell scripts (covers terraform/tflint/terraform-docs/
+  opa version bumps)
+- A weekly schedule (`before 6am on monday`)
+- A 7-day supply-chain quarantine via `minimumReleaseAge` (no update lands
+  sooner than 7 days after the upstream release timestamp)
+- Dependency-dashboard + semantic-commits enablement
+
+That preset is the right authority for stack-wide behavior. Duplicating it
+locally guarantees drift over time and forces every consumer to rev in lockstep
+through Renovate-driven PRs against each duplicated rule.
 
 ## Decision Drivers
 
-1. Dependency automation must be operational, not aspirational.
-2. The repo must preserve SHA-pinned GitHub Actions and exact-pinned Terraform/provider
-   behavior while the org preset is unavailable.
-3. The migration back to an org preset should be a small config-only change when the preset
-   exists.
+1. Stack-wide Renovate behavior must apply uniformly across the fleet without
+   per-consumer copy-paste.
+2. Consumer-specific package grouping (the framework template's own SHA pin,
+   per-repo automerge decisions) must remain locally controllable.
+3. Pin discipline for the *extended preset itself* is unavoidable — Renovate's
+   preset-extension mechanism does not support SHA-pinning the preset source.
+   The tradeoff must be documented and accepted explicitly.
 
 ## Considered Options
 
-1. Keep extending the missing org preset.
-2. Inline the required Renovate behavior in this repo.
-3. Disable Renovate until the org preset exists.
+1. Extend the framework-template preset; keep only consumer-specific rules
+   locally.
+2. Keep the inlined local baseline (original ADR-0002 decision).
+3. Hybrid: copy the framework-template preset verbatim and let drift-gate or a
+   periodic sync workflow enforce byte-equality.
 
 ## Decision Outcome
 
-Chosen option: **Option 2, inline the required Renovate behavior locally.**
+Chosen option: **Option 1, extend the framework-template preset.**
 
-The local config extends Renovate's recommended baseline, enables a dependency dashboard,
-uses semantic commits, runs weekly, pins GitHub Actions by digest, and uses Terraform
-`rangeStrategy: "pin"`. It also enables a narrowly scoped `custom.regex` manager for the
-`terraform_version` input in `.github/workflows/pr-validation.yaml`, keeping the CI
-Terraform binary aligned with the exact module constraint in `terraform/versions.tf`.
+The local `.github/renovate.json5` becomes:
+
+```jsonc
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>NWarila/terraform-framework-template//.github/renovate.json5"
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["NWarila/terraform-framework-template"],
+      "groupName": "terraform-framework-template",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps",
+      "automerge": false
+    }
+  ]
+}
+```
+
+The extends reference does NOT pin a ref (Renovate's preset extension does not
+support SHA pinning of the preset source). It follows the framework-template's
+`main` branch. This is the same convention used by other consumers in the fleet
+(see `NWarila/github-terraform-runner` which extends `NWarila/terraform-runner-template`
+the same way).
 
 ## Pros and Cons of the Options
 
-### Option 1: Keep extending the missing org preset
+### Option 1: Extend the framework-template preset (chosen)
 
-- **Good, because** it matches org ADR-0004 literally.
-- **Bad, because** Renovate cannot apply a preset that is not published.
+- **Good, because** stack-wide Renovate behavior is centralized; one upstream
+  change propagates to every consumer without copy-paste.
+- **Good, because** the consumer file is reviewable as a ~10-line
+  consumer-specific addition rather than a ~70-line duplicated baseline.
+- **Good, because** it matches org ADR-0004's stated pattern.
+- **Bad, because** the extended preset reference cannot be SHA-pinned, so
+  upstream-preset changes propagate without an intermediate consumer PR
+  review. Mitigated by the framework template's own CI gating on preset
+  changes and by Renovate's preset-resolution being deterministic per commit
+  (a faulty preset would surface in every consumer's next Renovate run).
 
-### Option 2: Inline the baseline locally (chosen)
+### Option 2: Keep the inlined local baseline (previous decision)
 
-- **Good, because** dependency automation is self-contained and auditable in this repo.
-- **Good, because** the local behavior preserves the important org controls.
-- **Bad, because** common Renovate behavior can drift from other repositories until the org
-  preset exists.
+- **Good, because** every Renovate rule is locally visible and version-pinned
+  in commit history.
+- **Bad, because** stack-wide changes require N consumer PRs.
+- **Bad, because** drift between consumers accumulates silently; the previous
+  inlined config was already missing the framework template's supply-chain
+  quarantine and several customManager improvements.
 
-### Option 3: Disable Renovate
+### Option 3: Hybrid mirror with drift-gate enforcement
 
-- **Good, because** it avoids config drift.
-- **Bad, because** pinned dependencies silently age.
+- **Good, because** keeps byte-identity with the canonical preset.
+- **Bad, because** drift-gate failures on consumer PRs now block on
+  Renovate-internal changes that have nothing to do with the consumer's
+  domain. Friction without security benefit.
 
 ## Confirmation
 
-Adherence is confirmed by reviewing `.github/renovate.json5` for:
+Adherence is confirmed by:
 
-1. `github-actions` package rules with `pinDigests: true`.
-2. Terraform package rules with `rangeStrategy: "pin"`.
-3. `custom.regex` coverage for the `hashicorp/setup-terraform` `terraform_version` input.
-4. A weekly schedule and dependency dashboard.
-
-When `nwarila-platform/.github` publishes a working shared preset, this ADR may be superseded
-and the local config can return to `extends: ["github>nwarila-platform/.github"]`.
+1. `.github/renovate.json5` `extends:` array contains
+   `github>NWarila/terraform-framework-template//.github/renovate.json5`.
+2. The local file contains no `enabledManagers`, `customManagers`,
+   `schedule`, `minimumReleaseAge`, or general-Terraform/GitHub-Actions
+   `packageRules` (those live upstream).
+3. The local file's `packageRules` contains only consumer-specific entries
+   (currently: the `NWarila/terraform-framework-template` SHA-pin
+   automerge=false group).
+4. Renovate's preview/dependency-dashboard runs reflect upstream-preset
+   behavior after the first scheduled run.
 
 ## Consequences
 
 ### Positive
 
-- Dependency updates remain operational today.
-- Recruiter-facing automation no longer points at a missing org artifact.
+- Stack-wide Renovate changes ship to this consumer automatically.
+- Local file is small, focused, and easy to review.
+- Supply-chain quarantine, custom managers, and digest-pin discipline are
+  inherited rather than duplicated.
 
 ### Negative
 
-- This repo temporarily carries Renovate policy that ADR-0004 expected to be centralized.
+- Upstream preset changes are not visible to this repo until Renovate's next
+  scheduled run; there is no per-consumer review checkpoint on preset bumps.
+- A bad upstream-preset commit would propagate to every consumer
+  simultaneously. Mitigated by the framework template's own CI.
 
 ### Neutral
 
-- The decision is easy to reverse once the shared preset exists.
+- The reversibility is high: re-inlining the preset is a single
+  `.github/renovate.json5` rewrite.
 
 ## Assumptions
 
-1. The org shared preset will be created later or intentionally abandoned.
-2. Renovate continues to support package-rule based digest pinning for GitHub Actions.
+1. `NWarila/terraform-framework-template/.github/renovate.json5` will continue
+   to publish a working preset and won't be removed without notice.
+2. Renovate continues to resolve `github>owner/repo//path` preset references
+   without authentication for public repos.
+3. The framework-template's own CI gates preset changes before they merge to
+   `main`.
 
 ## Supersedes
 
-None.
+The original ADR-0002 decision to inline a full local baseline (recorded in
+this same file's previous content). The blocker that justified inlining
+(missing upstream preset) is resolved.
 
 ## Superseded by
 
@@ -112,16 +184,21 @@ None (current).
 
 ## Implementing PRs
 
-Pending. This ADR ships with the config change that inlines `.github/renovate.json5`.
+This ADR ships with the `.github/renovate.json5` rewrite that adopts the
+extends pattern.
 
 ## Related ADRs
 
-- [ADR-0004 (org)](../org/0004-use-renovate-for-dependency-updates.md) — establishes the
-  desired shared-baseline pattern.
+- [ADR-0004 (org)](../org/0004-use-renovate-for-dependency-updates.md) —
+  establishes the desired shared-baseline pattern; this ADR's new decision
+  realizes it.
+- [ADR-0004 (repo)](0004-consume-terraform-template.md) — records the
+  consumption of `NWarila/terraform-framework-template`; this ADR extends
+  that consumption to Renovate.
 
 ## Compliance Notes
 
-| Framework              | Control / Practice ID                           | Potential Evidence Contribution                                              |
-| ---------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |
-| NIST SP 800-53 Rev. 5  | SI-2 (Flaw Remediation)                         | Renovate continues to provide automated dependency-update visibility.         |
-| NIST SP 800-218 (SSDF) | PW.4 (Reuse Existing, Well-Secured Software)    | Local digest pinning and exact Terraform pins keep reused components tracked. |
+| Framework              | Control / Practice ID                           | Potential Evidence Contribution                                                                            |
+| ---------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| NIST SP 800-53 Rev. 5  | SI-2 (Flaw Remediation)                         | Inherited Renovate preset provides automated dependency-update visibility with fleet-wide consistency.     |
+| NIST SP 800-218 (SSDF) | PW.4 (Reuse Existing, Well-Secured Software)    | Inherited digest pinning, exact-Terraform pinning, and supply-chain quarantine keep reused components tracked.  |

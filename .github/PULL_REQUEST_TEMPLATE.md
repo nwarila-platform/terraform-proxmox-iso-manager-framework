@@ -1,29 +1,14 @@
 ## Summary
 
-Describe the change and why it is needed.
-
-## Change type
-
-- [ ] Terraform module behavior
-- [ ] Terraform input/output contract
-- [ ] Example or test fixture
-- [ ] Documentation
-- [ ] CI/CD or release automation
-- [ ] Security policy or security workflow
-- [ ] Dependency update
-
-## Validation
-
-- [ ] `make ci`
-- [ ] `make graph`, when Terraform dependency shape could change
-- [ ] Generated Terraform docs are current
-- [ ] Security-sensitive changes reviewed against `docs/explanation/threat-model.md`
-- [ ] No state files, plans, credentials, `tfvars`, provider caches, signed URLs, or secrets committed
+<!-- 1-3 bullets describing what this PR changes and why. -->
 
 ## Risk
 
-Describe compatibility risk, blast radius, and rollback path.
+<!-- What could break? What did you test? Reference any incident drills. -->
 
-## Evidence
+## Test plan
 
-Link relevant workflow runs, command output, release evidence, graph artifacts, or screenshots.
+- [ ] Self-CI passes locally / in PR
+- [ ] If touching universal-layer files: confirm baseline-manifest.json is intentionally updated
+- [ ] If touching reusable workflows: confirm direct caller workflows still exercise them
+- [ ] Documentation reflects the change (when applicable)
