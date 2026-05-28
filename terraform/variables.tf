@@ -116,7 +116,36 @@ variable "overwrite_unmanaged" {
   description = <<-EOT
     When true, delete and replace an unmanaged file that already exists at the target
     Proxmox storage path. Defaults to false so the module fails closed if a same-named ISO
-    exists outside Terraform state. Set true only during deliberate adoption/recovery.
+    exists outside Terraform state. Set true only during deliberate adoption/recovery, and
+    only together with adopt_unmanaged_confirmation (below), which forces the operator to
+    name the exact file being adopted.
+  EOT
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "adopt_unmanaged_confirmation" {
+  description = <<-EOT
+    Friction guard for the destructive overwrite_unmanaged recovery path. When
+    overwrite_unmanaged is true, this MUST equal iso_pin.filename - it forces the operator
+    to name the exact file being deleted and replaced, so the destructive flag cannot be
+    flipped on by accident or carried over from another module instance. Leave empty ("")
+    for the normal (non-adopting) path. Enforced by a precondition on the managed resource.
+  EOT
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "expose_iso_url" {
+  description = <<-EOT
+    When true, the iso_url output returns the upstream URL; when false (default) it returns
+    null. The output is always marked sensitive, so it is redacted from CLI plan/apply
+    output regardless. Default false reduces accidental disclosure of URL path segments
+    (which the module cannot prove are not secret) into state that downstream tooling reads.
+    Set true only when a downstream workflow genuinely needs the upstream URL for
+    provenance; prefer iso_sha256 + iso_filename for correlation where possible.
   EOT
   type        = bool
   default     = false

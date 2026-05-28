@@ -42,6 +42,7 @@
 !/docs/decision-records/repo/0002-use-repo-local-renovate-baseline.md
 !/docs/decision-records/repo/0003-allow-example-local-readmes.md
 !/docs/decision-records/repo/0004-consume-terraform-template.md
+!/docs/decision-records/repo/0005-harden-iso-url-output-and-unmanaged-overwrite.md
 
 # Diataxis quadrants.
 !/docs/tutorials/
