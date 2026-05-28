@@ -9,10 +9,35 @@ and SHA-verify a single ISO; the calling Terraform configuration emits a Packer
 
 - A Proxmox VE cluster reachable via the bpg/proxmox provider.
 - A storage datastore on Proxmox with ISO content type enabled (e.g. `cephFS`, `local`).
-- A Proxmox API token with the privileges required by `proxmox_download_file`.
+- A Proxmox API token scoped to least privilege (see below).
 - The exact Terraform version pinned in [`../../terraform/versions.tf`](../../terraform/versions.tf).
   Use `tfenv` or `asdf` if you manage multiple versions on one workstation.
   Any other Terraform version causes `terraform init` to fail.
+
+## Least-privilege Proxmox access
+
+`proxmox_download_file` needs exactly these privileges:
+
+- `Datastore.AllocateTemplate` on the target storage (write the ISO into the
+  storage's `iso/` content directory).
+- `Sys.Audit` and `Sys.Modify` on the target node (run and observe the
+  download task).
+
+Requirements for consumers:
+
+- **MUST** use a dedicated API token per environment, scoped to only the
+  privileges above on only the target node and storage. Create a role
+  (e.g. `IsoDownloader`) containing exactly those three privileges and assign
+  it to the token on the specific `/storage/<datastore>` and `/nodes/<node>`
+  paths.
+- **MUST NOT** reuse a broad VM-admin token or a `root@pam` credential for
+  this module. The module's blast radius should be limited to ISO download;
+  a token that can also create/destroy VMs or modify cluster config expands
+  the impact of a compromised CI runner well beyond this module's purpose.
+- **MUST** store Terraform state in a remote backend with locking and
+  restricted read access. Local state is acceptable only for disposable local
+  development. State can contain the echoed `iso_url` and resource metadata;
+  treat it as sensitive.
 
 ## Step 1: Pin the module in your Terraform configuration
 
@@ -137,7 +162,8 @@ When this module ships a new version:
   the SHA) or the URL is serving something different than expected. The integrity check
   is working as designed — do not bypass it without understanding why it triggered.
 - **`proxmox_download_file` returns 401 / 403**: the API token lacks
-  `Datastore.AllocateSpace` or related privileges. See the bpg/proxmox provider docs.
+  `Datastore.AllocateTemplate` on the storage or `Sys.Audit` / `Sys.Modify`
+  on the node. See the Least-privilege Proxmox access section above.
 - **`module "iso"` source URL fails with "module not found"**: check that `//terraform`
   is present in the source string. Without it, Terraform tries to find the module at the
   repository root and reports "no module configuration files found".
