@@ -22,4 +22,4 @@ jobs:
       contents: read
       security-events: write
       actions: read
-    uses: NWarila/terraform-framework-template/.github/workflows/reusable-codeql.yaml@c885df7bd5cf9d1d5a4b3aabe1b1b9ced10e63b0
+    uses: NWarila/.github/.github/workflows/reusable-codeql.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
