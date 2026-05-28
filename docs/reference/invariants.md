@@ -25,13 +25,11 @@ These rules must remain true unless a future ADR explicitly changes the module c
 - Terraform tests do not require a live Proxmox cluster.
 - Tests cover accepted inputs, rejected inputs, safety defaults, and TLS verification.
 - `make ci` remains the canonical local validation entrypoint.
-- `make graph` remains the graph-validation entrypoint.
-- Failure-case examples are documented but are not treated as normal runnable examples.
 
 ## Documentation contract
 
 - Generated Terraform reference tables are injected into `docs/reference/terraform.md`.
 - Security boundaries live in `docs/explanation/threat-model.md`.
 - Release gates live in `docs/reference/release-gates.md`.
-- Template reuse standards live in `docs/reference/golden-template-contract.md`.
+- The framework-template mirror contract lives in `docs/reference/mirroring.md`.
 - Adoption steps live in `docs/how-to/adopt-this-template.md`.
