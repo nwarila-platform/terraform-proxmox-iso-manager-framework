@@ -48,12 +48,24 @@ run "valid_inputs_pass_all_validations" {
   }
 }
 
-run "accepts_valid_iso_pin" {
+run "iso_url_hidden_by_default" {
   command = plan
 
   assert {
+    condition     = output.iso_url == null
+    error_message = "iso_url should be null unless expose_iso_url is set true"
+  }
+}
+
+run "iso_url_exposed_when_opted_in" {
+  command = plan
+  variables {
+    expose_iso_url = true
+  }
+
+  assert {
     condition     = output.iso_url == "https://example.test/foo.iso"
-    error_message = "iso_url should echo back a valid non-tokenized HTTPS URL"
+    error_message = "iso_url should echo the URL when expose_iso_url = true"
   }
 }
 
@@ -68,6 +80,37 @@ run "default_safety_flags_fail_closed" {
   assert {
     condition     = proxmox_download_file.iso.overwrite_unmanaged == false
     error_message = "overwrite_unmanaged should default to false"
+  }
+}
+
+run "overwrite_unmanaged_requires_confirmation" {
+  command = plan
+  variables {
+    overwrite_unmanaged = true
+  }
+  # adopt_unmanaged_confirmation left empty: precondition must fire.
+  expect_failures = [proxmox_download_file.iso]
+}
+
+run "overwrite_unmanaged_rejects_mismatched_confirmation" {
+  command = plan
+  variables {
+    overwrite_unmanaged          = true
+    adopt_unmanaged_confirmation = "wrong-name.iso"
+  }
+  expect_failures = [proxmox_download_file.iso]
+}
+
+run "overwrite_unmanaged_accepts_matching_confirmation" {
+  command = plan
+  variables {
+    overwrite_unmanaged          = true
+    adopt_unmanaged_confirmation = "foo.iso"
+  }
+
+  assert {
+    condition     = proxmox_download_file.iso.overwrite_unmanaged == true
+    error_message = "overwrite_unmanaged should be true when confirmation matches the filename"
   }
 }
 

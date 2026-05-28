@@ -63,10 +63,13 @@ This module assumes the following adversaries:
   the `iso_pin` object before it reaches the module; the module trusts its inputs.
   Defense-in-depth at this layer is the consumer's responsibility (host hardening,
   credential storage, code review).
-- **Secret-bearing URL path segments.** Mitigated only by convention and review. The
-  module rejects query strings, fragments, and embedded credentials because those are
-  common locations for signed URL material, but it cannot prove that a URL path segment is
-  not itself secret. Consumers must not place tokens in ISO URLs.
+- **Secret-bearing URL path segments.** Mitigated by input rejection plus output
+  suppression. The module rejects query strings, fragments, and embedded credentials
+  because those are common locations for signed URL material, but it cannot prove that a
+  URL path segment is not itself secret. As defense-in-depth, the `iso_url` output is
+  null by default (gated behind `expose_iso_url`) and always marked `sensitive`, so a
+  path-embedded token is not casually echoed into CLI output or downstream-readable state.
+  Consumers must still not place tokens in ISO URLs.
 - **Compromised Proxmox node.** Out of scope. A compromised Proxmox node can return any
   state the module observes; the trust boundary is at the Proxmox API.
 
@@ -85,6 +88,13 @@ This module assumes the following adversaries:
   or credential-bearing ISO URLs because Terraform state, plans, logs, and outputs are not
   safe storage for bearer tokens. All Proxmox credentials are handled by the bpg/proxmox
   provider configuration upstream of this module.
+- **`iso_url` output suppressed by default.** The output returns null unless
+  `expose_iso_url = true`, and is always `sensitive`. Reduces accidental disclosure of
+  URL path material into state read by downstream tooling.
+- **Destructive-recovery friction.** `overwrite_unmanaged = true` (which deletes a
+  same-named unmanaged ISO) requires `adopt_unmanaged_confirmation` to equal
+  `iso_pin.filename`, enforced by a resource precondition. The destructive flag cannot be
+  flipped on by accident or carried over from another module instance.
 - **Explicit Proxmox download TLS verification** via `verify = true` on the managed
   resource.
 - **No state-modifying side effects beyond `proxmox_download_file`.** The module's

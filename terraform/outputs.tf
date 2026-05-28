@@ -26,8 +26,13 @@ output "iso_sha256" {
 }
 
 output "iso_url" {
-  description = "Non-tokenized upstream URL the ISO was downloaded from. Echoed back for provenance recording."
-  value       = var.iso_pin.url
+  description = <<-EOT
+    Non-tokenized upstream URL the ISO was downloaded from. Returned only when
+    expose_iso_url = true; otherwise null. Always marked sensitive so it is redacted from
+    CLI output. Prefer iso_sha256 + iso_filename for provenance correlation.
+  EOT
+  value       = var.expose_iso_url ? var.iso_pin.url : null
+  sensitive   = true
 }
 
 output "iso_filename" {
