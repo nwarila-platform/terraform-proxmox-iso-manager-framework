@@ -12,7 +12,7 @@ valid_input := {
   ],
   "files": {
     "terraform/resources.tf": "checksum_algorithm = \"sha256\"\nverify             = true\n",
-    ".github/workflows/release-evidence.yaml": "name: Release Evidence\n",
+    ".github/workflows/release.yaml": "name: Release\n",
   },
 }
 
@@ -59,4 +59,29 @@ test_rejects_overwrite_unmanaged_outside_exception if {
   })
   some msg in messages
   contains(msg, "overwrite_unmanaged")
+}
+
+test_rejects_missing_release_workflow if {
+  # Build input directly (not object.union) because object.union merges the
+  # files object recursively, which would retain valid_input's release.yaml.
+  messages := deny with input as {
+    "iso_pins": [{"url": "https://example.test/Rocky.iso"}],
+    "module_settings": [],
+    "files": {
+      "terraform/resources.tf": "checksum_algorithm = \"sha256\"\nverify             = true\n",
+    },
+  }
+  some msg in messages
+  contains(msg, "release evidence workflow must exist")
+}
+
+test_rejects_missing_checksum_algorithm if {
+  messages := deny with input as object.union(valid_input, {
+    "files": {
+      "terraform/resources.tf": "verify = true\n",
+      ".github/workflows/release.yaml": "name: Release\n",
+    },
+  })
+  some msg in messages
+  contains(msg, "checksum_algorithm")
 }

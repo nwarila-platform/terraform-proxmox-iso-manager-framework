@@ -46,6 +46,6 @@ deny contains msg if {
 }
 
 deny contains msg if {
-  not input.files[".github/workflows/release-evidence.yaml"]
+  not input.files[".github/workflows/release.yaml"]
   msg := "release evidence workflow must exist"
 }
