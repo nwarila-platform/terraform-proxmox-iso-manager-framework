@@ -25,7 +25,7 @@ jobs:
       contents: write
       attestations: write
       id-token: write
-    uses: NWarila/terraform-framework-template/.github/workflows/reusable-release-evidence.yaml@c885df7bd5cf9d1d5a4b3aabe1b1b9ced10e63b0
+    uses: NWarila/terraform-framework-template/.github/workflows/reusable-release-evidence.yaml@3b0a832f38e8057d8531e890a666242dc32cab21
     with:
       # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
       terraform_version: "1.15.2"
