@@ -15,10 +15,13 @@
 
 This repository consumes `NWarila/terraform-framework-template` as the
 canonical golden standard for Terraform module repositories under `nwarila`
-and `nwarila-platform`. Workflow callers reference the template's reusables
-by SHA. Baseline drift is detected by the canonical `NWarila/drift-gate`
-action against the template's published `baseline-manifest.json`. Local CI
-runs `make ci` natively without a cross-repo round-trip.
+and `nwarila-platform`. Universal CI reusables are owned by and called from
+`NWarila/.github`; the framework template owns only the type-specific
+reusables (`reusable-release-evidence`, `reusable-terraform-deploy`). Workflow
+callers reference each reusable from its owning repo by SHA. Baseline drift is
+detected by the canonical `NWarila/drift-gate` action against the template's
+published `baseline-manifest.json`. Local CI runs `make ci` natively without a
+cross-repo round-trip.
 
 ## Context and Problem Statement
 
@@ -31,10 +34,13 @@ Without a single source of rigor, each Terraform repository drifts: CI gates
 diverge, OPA rules vary, contract checks become wishful prose, and the
 "golden standard" exists only by convention.
 
-`NWarila/terraform-framework-template` is that single source. It publishes
-the reusable workflows (`reusable-codeql.yaml`, `reusable-iac-security.yaml`,
-`reusable-scorecard.yaml`, `reusable-release-please.yaml`,
-`reusable-release-evidence.yaml`, `reusable-auto-merge.yaml`,
+`NWarila/terraform-framework-template` is that single source for
+Terraform-specific rigor. Following the org-wide reusable-centralization, the
+five **universal** reusables (`reusable-codeql.yaml`,
+`reusable-iac-security.yaml`, `reusable-scorecard.yaml`,
+`reusable-release-please.yaml`, `reusable-auto-merge.yaml`) are owned by and
+called from `NWarila/.github`; the framework template owns only the
+**type-specific** reusables (`reusable-release-evidence.yaml`,
 `reusable-terraform-deploy.yaml`) plus a `baseline-manifest.json` enumerating
 files that consumers must mirror byte-for-byte.
 
@@ -58,10 +64,13 @@ Chosen option: consume `NWarila/terraform-framework-template` by SHA.
 Mechanics:
 
 - Each consumer-side workflow is a thin caller that invokes a corresponding
-  `reusable-*.yaml` from the template at a SHA pin. The pins are grouped by
-  Renovate under `terraform-framework-template` so all callers bump
-  together. Callers covered: `codeql.yaml`, `scorecard.yaml`, `security.yaml`,
-  `auto-merge.yaml`, and the `release.yaml` consolidated workflow.
+  `reusable-*.yaml` from its owning repo at a SHA pin. The universal callers —
+  `codeql.yaml`, `scorecard.yaml`, `security.yaml`, `auto-merge.yaml`,
+  `repo-hygiene.yaml`, and `release.yaml`'s release-please job — target
+  `NWarila/.github`; `release.yaml`'s evidence job targets
+  `NWarila/terraform-framework-template` (the type-specific
+  `reusable-release-evidence`). Renovate groups the pins so callers bump
+  together.
 - `release.yaml` follows the canonical task-dispatch pattern: on push to
   `main` (gated by repo variable `RELEASE_PLEASE_ON_PUSH=true`) it calls
   `reusable-release-please`; on `release.published` (or explicit
