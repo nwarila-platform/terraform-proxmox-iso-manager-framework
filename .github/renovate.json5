@@ -2,74 +2,26 @@
   // Schema for editor validation. Update only when intentionally adopting a new schema.
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
 
-  // Renovate config for NWarila/terraform-framework-template and (after sync) every
-  // consumer. Universal across the fleet so that the same Renovate behavior
-  // applies in every Terraform repository under nwarila and nwarila-platform.
+  // Thin consumer config. Stack-wide Renovate policy
+  // (rangeStrategy=pin for terraform, pinDigests for actions, supply-chain
+  // quarantine, custom managers for `# renovate:` annotations, schedule,
+  // etc.) lives in NWarila/terraform-framework-template. This file keeps
+  // only repo-specific dep grouping.
   //
-  // Rules in this file:
-  //   - Pin third-party GitHub Actions to commit SHAs (matches the OPA
-  //     golden_terraform package's enforcement).
-  //   - Pin Terraform and provider versions exactly (org ADR 0005).
-  //   - Track explicit `# renovate:` annotations in workflow comments for
-  //     tool versions (Terraform CLI, TFLint, terraform-docs, OPA, zizmor).
-
+  // The extends does not pin a ref (Renovate preset extends doesn't support
+  // SHA-pinning of the preset source itself); it follows the upstream main
+  // branch. The tradeoff is that preset changes propagate without an
+  // intermediate consumer PR. See ADR-0002 for the full rationale.
   "extends": [
-    "config:recommended",
-    ":dependencyDashboard",
-    ":semanticCommits",
-    ":semanticCommitTypeAll(chore)",
-    "schedule:weekly"
-  ],
-
-  "labels": ["dependencies"],
-  "prConcurrentLimit": 5,
-
-  "enabledManagers": [
-    "github-actions",
-    "terraform",
-    "pip_requirements",
-    "custom.regex"
-  ],
-
-  "customManagers": [
-    {
-      // Match `# renovate: datasource=...` annotations followed by a
-      // value: "..." or value: '...' assignment. Catches Terraform/TFLint/
-      // terraform-docs/OPA/zizmor versions in workflow inputs and shell
-      // scripts.
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/^\\.github/workflows/.*\\.ya?ml$/",
-        "/^tools/.*\\.sh$/"
-      ],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+\\w+(?:_VERSION)?:\\s*\"(?<currentValue>[^\"]+)\"",
-        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+\\w+_VERSION=\"(?<currentValue>[^\"]+)\"",
-        "# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?\\s+pip install --no-cache-dir (?<depName2>[a-zA-Z0-9-._]+)==(?<currentValue>[^\\s]+)"
-      ]
-    }
+    "github>NWarila/terraform-framework-template//.github/renovate.json5"
   ],
 
   "packageRules": [
     {
-      "matchManagers": ["github-actions"],
-      "pinDigests": true,
-      "semanticCommitType": "ci",
-      "semanticCommitScope": "deps"
-    },
-    {
-      "matchManagers": ["terraform"],
-      "rangeStrategy": "pin",
-      "semanticCommitType": "deps",
-      "semanticCommitScope": "deps"
-    },
-    {
-      "matchDepNames": ["hashicorp/terraform"],
-      "groupName": "Terraform CLI",
-      "semanticCommitType": "deps",
-      "semanticCommitScope": "deps"
-    },
-    {
+      // Bumps to NWarila/terraform-framework-template itself (the
+      // template SHA pin in workflow `uses:` references and the
+      // `source-ref` of NWarila/drift-gate callers). Reviewed manually
+      // because they affect every CI gate's behavior.
       "matchDepNames": ["NWarila/terraform-framework-template"],
       "groupName": "terraform-framework-template",
       "semanticCommitType": "chore",

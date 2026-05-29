@@ -135,6 +135,7 @@
 !/.github/workflows/codeql.yaml
 !/.github/workflows/org-adr-sync.yaml
 !/.github/workflows/release.yaml
+!/.github/workflows/repo-hygiene.yaml
 !/.github/workflows/scorecard.yaml
 !/.github/workflows/security.yaml
 !/.github/workflows/template-sync.yaml
