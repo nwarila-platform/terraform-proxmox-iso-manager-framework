@@ -1,4 +1,4 @@
-name: PR Validation
+name: CI
 
 on:
   push:
@@ -12,13 +12,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: pr-validation-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     name: make ci
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:

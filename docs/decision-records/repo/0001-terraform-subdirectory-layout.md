@@ -50,7 +50,7 @@ Module HCL lives under `terraform/`. Specifically:
 
 - All `.tf` files for this module reside in `/terraform/`. No `.tf` files live at the repository root.
 - Consumers pin via `source = "git::https://github.com/nwarila-platform/terraform-proxmox-iso-manager-framework.git//terraform?ref=vX.Y.Z"`. The `//terraform` path component is non-optional; without it, `terraform init` resolves the repository root and fails to find any module configuration.
-- The PR-validation workflow (`.github/workflows/pr-validation.yaml`) runs `terraform fmt -check -recursive .`, `terraform init -backend=false`, and `terraform validate` with `working-directory: terraform`. The path filter that triggers the workflow is scoped to `terraform/**`.
+- The CI workflow (`.github/workflows/ci.yaml`) runs `terraform fmt -check -recursive .`, `terraform init -backend=false`, and `terraform validate` with `working-directory: terraform`. The path filter that triggers the workflow is scoped to `terraform/**`.
 - The repository root is reserved for repository-specific governance (`README.md`, `CHANGELOG.md`, `LICENSE`), tooling (`.editorconfig`, `.gitignore`, `.gitattributes`, `.markdownlint-cli2.jsonc`), release automation (`release-please-config.json`, `.release-please-manifest.json`), and `.github/` workflow/config files that cannot be inherited. Generic community-health files are inherited from `nwarila-platform/.github`.
 - Architectural decisions live at `docs/decision-records/{org,repo}/` per [ADR-0001 (org)](../org/0001-use-architecture-decision-records.md).
 

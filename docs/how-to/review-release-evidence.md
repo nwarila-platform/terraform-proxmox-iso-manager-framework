@@ -1,8 +1,8 @@
 # Review Release Evidence
 
-Release evidence is produced by the `release-evidence.yaml` workflow (which calls the
-canonical `NWarila/terraform-framework-template` reusable-release-evidence reusable) and
-uploaded as a GitHub Actions artifact.
+Release evidence is produced by the `release.yaml` workflow's `evidence` job, which
+calls the canonical `NWarila/terraform-framework-template` reusable-release-evidence
+reusable and uploads the bundle as a GitHub release artifact with attestations.
 
 ## Where To Look
 
