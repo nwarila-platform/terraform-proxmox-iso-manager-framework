@@ -62,11 +62,15 @@ test_rejects_overwrite_unmanaged_outside_exception if {
 }
 
 test_rejects_missing_release_workflow if {
-  messages := deny with input as object.union(valid_input, {
+  # Build input directly (not object.union) because object.union merges the
+  # files object recursively, which would retain valid_input's release.yaml.
+  messages := deny with input as {
+    "iso_pins": [{"url": "https://example.test/Rocky.iso"}],
+    "module_settings": [],
     "files": {
       "terraform/resources.tf": "checksum_algorithm = \"sha256\"\nverify             = true\n",
     },
-  })
+  }
   some msg in messages
   contains(msg, "release evidence workflow must exist")
 }
