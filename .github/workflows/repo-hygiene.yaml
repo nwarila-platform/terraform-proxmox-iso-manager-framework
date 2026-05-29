@@ -1,6 +1,6 @@
 name: Repo Hygiene
-# Caller for the canonical NWarila/terraform-framework-template
-# reusable-repo-hygiene workflow. Evaluates the universal repo_hygiene OPA
+# Caller for the canonical NWarila/.github reusable-repo-hygiene workflow.
+# Evaluates the universal repo_hygiene OPA
 # policy (SHA-pinned uses:, exact terraform/provider pins, pull_request_target
 # boundary safety) against this consumer's tree without mirroring the policy
 # or its input-builder locally.
@@ -24,6 +24,6 @@ jobs:
   hygiene:
     permissions:
       contents: read
-    uses: NWarila/terraform-framework-template/.github/workflows/reusable-repo-hygiene.yaml@efcf3274d8bc6f4b192be063db8f284db6d9423a
+    uses: NWarila/.github/.github/workflows/reusable-repo-hygiene.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
     with:
-      framework_ref: efcf3274d8bc6f4b192be063db8f284db6d9423a
+      source_ref: f25d8d5c0fdedca23671be7bfe635b66081bfeee
