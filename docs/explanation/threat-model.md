@@ -102,5 +102,5 @@ This module assumes the following adversaries:
   keeps SHA pins and version pins current with weekly PRs that the maintainer reviews
   and tests before merging.
 - The variable validation rules described above are exercised on every PR by the
-  `terraform test` step in `.github/workflows/pr-validation.yaml`. A regression that
+  `terraform test` step in `.github/workflows/ci.yaml`. A regression that
   weakens any validation block is detected at PR time, not in production.
