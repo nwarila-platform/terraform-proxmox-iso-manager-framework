@@ -36,10 +36,11 @@ diverge, OPA rules vary, contract checks become wishful prose, and the
 
 `NWarila/terraform-framework-template` is that single source for
 Terraform-specific rigor. Following the org-wide reusable-centralization, the
-five **universal** reusables (`reusable-codeql.yaml`,
+six **universal** reusables (`reusable-codeql.yaml`,
 `reusable-iac-security.yaml`, `reusable-scorecard.yaml`,
-`reusable-release-please.yaml`, `reusable-auto-merge.yaml`) are owned by and
-called from `NWarila/.github`; the framework template owns only the
+`reusable-release-please.yaml`, `reusable-auto-merge.yaml`, and
+`reusable-repo-hygiene.yaml`) are owned by and called from `NWarila/.github`;
+the framework template owns only the
 **type-specific** reusables (`reusable-release-evidence.yaml`,
 `reusable-terraform-deploy.yaml`) plus a `baseline-manifest.json` enumerating
 files that consumers must mirror byte-for-byte.
@@ -90,10 +91,9 @@ Mechanics:
   mirror is byte-identical to `nwarila-platform/.github` at a pinned SHA.
 - `policies/opa/iso_manager.rego` retains rules specific to the ISO manager
   domain (HTTPS-only URLs, `overwrite_unmanaged` restrictions,
-  `checksum_algorithm = "sha256"`, `verify = true`). Universal rules are
-  expected to live in the template's `policies/opa/repo_hygiene.rego` and
-  `policies/opa/terraform_plan.rego` once those are mirrored into this
-  consumer (currently unmirrored).
+  `checksum_algorithm = "sha256"`, `verify = true`). Universal repository
+  hygiene rules run through this repo's `repo-hygiene.yaml` caller of
+  `NWarila/.github`.
 
 ## Consequences
 
@@ -113,10 +113,11 @@ Mechanics:
 - This repository depends on `NWarila/terraform-framework-template` being
   available at the pinned SHA. A force-deletion or rewrite of the template's
   `main` would break this repository's CI until the pin is updated.
-- The template publishes 63 byte-identical files in `baseline-manifest.json`;
-  this consumer currently mirrors 17 of them. `template-sync.yaml` will flag
-  the remainder until the backfill lands. `pull_request` gating on
-  `template-sync.yaml` is therefore deferred until the backfill is complete.
+- The template manifest is intentionally slim. At the source currently pinned
+  by `template-sync.yaml` (`dbf383819632c8bc1bbb9bbaef1cff2deccd0157`), it
+  publishes 11 `byte_identical` entries and 9 `scaffold_starter` entries. This
+  consumer mirrors the enforced entries; the old bulk-backfill plan is
+  obsolete.
 - Updates to the template's reusable interface (new required input) require
   updating the consumer's caller manually. Renovate does not auto-edit
   caller `with:` blocks.

@@ -4,8 +4,8 @@ This repository is a narrow Terraform child module. It manages one Proxmox ISO d
 from one Git-tracked pin and returns the values a downstream Packer template build needs.
 
 The module is intentionally small, but the repository around it is treated like a small
-production platform component: exact tool pins, validation tests, security gates, graph
-evidence, release evidence, and ADR-governed documentation.
+production platform component: exact tool pins, validation tests, security gates,
+release evidence, and ADR-governed documentation.
 
 ## Responsibility Boundary
 

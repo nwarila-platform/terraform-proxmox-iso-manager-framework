@@ -37,7 +37,7 @@ Keep only example categories that are real for the derived module:
 - Real consumer-shaped example
 - Adoption or recovery example, if the module supports adoption or recovery
 - Failure-case example for an important rejected configuration
-- Graph/test fixtures, if graph or fixture tooling remains relevant
+- Test fixtures, if fixture tooling remains relevant
 
 Delete fake examples. A smaller honest template is better than broad but false coverage.
 
@@ -64,7 +64,7 @@ Update:
 - `docs/explanation/threat-model.md`
 - `docs/reference/release-gates.md`
 - `docs/reference/invariants.md`
-- `docs/reference/golden-template-contract.md`
+- `docs/reference/mirroring.md`
 - `docs/reference/terraform.md`
 
 Regenerate Terraform reference docs after editing the module.
@@ -75,12 +75,6 @@ Run:
 
 ```bash
 make ci
-```
-
-Run graph validation when graph behavior or Terraform dependency shape could change:
-
-```bash
-make graph
 ```
 
 Also inspect:
@@ -94,11 +88,12 @@ git diff --check
 
 Open a pull request and require the relevant workflows to pass before merge:
 
-- PR Validation
-- Repo CI
+- CI
 - Security Scan
 - CodeQL Analysis
-- Terraform Graph Regression
+- Scorecard
+- Template Sync
+- Repo Hygiene
 - Org ADR Mirror Check, if org ADR mirrors are present
 
 ## 8. First release
