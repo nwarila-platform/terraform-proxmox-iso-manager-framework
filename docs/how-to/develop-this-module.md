@@ -21,13 +21,11 @@ Run the exact Terraform version pinned in `terraform/versions.tf`:
 
 ```bash
 make ci
-make graph
 ```
 
-`make ci` runs Terraform formatting, init, validate, tests, and docs layout enforcement.
-`make graph` renders local graph evidence for the fixtures under `tests/fixtures/`. The PR
-Validation workflow runs the local CI gates, and the Graph Regression workflow publishes
-DOT, SVG, cycle JSON, and summary JSON as workflow artifacts.
+`make ci` runs Terraform formatting, init, validate, tests, generated-docs
+drift checks, docs layout enforcement, and OPA policy tests. The `CI` workflow
+runs the same local gates in GitHub Actions.
 
 ## Terraform lockfile policy
 

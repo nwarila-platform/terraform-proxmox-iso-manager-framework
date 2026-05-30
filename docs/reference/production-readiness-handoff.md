@@ -1,5 +1,9 @@
 # Production Readiness Handoff
 
+> Archived snapshot: this document records a 2026-05-27 handoff from before
+> the workflow migration landed. It is retained for history, but current repo
+> state comes from the live workflows and the docs updated after that migration.
+
 Date: 2026-05-27
 
 ## Snapshot
