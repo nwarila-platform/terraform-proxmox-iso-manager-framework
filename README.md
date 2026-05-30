@@ -30,7 +30,6 @@ component:
 - explicit threat model and module invariants
 - Diataxis documentation structure
 - ADR-backed design decisions
-- Terraform graph generation and dependency-cycle detection
 - OPA policy tests as part of `make ci`
 - CI security scanning
 - release evidence artifacts
@@ -99,7 +98,6 @@ state and outputs are not safe places for bearer tokens.
 | [`examples/minimal/`](examples/minimal/) | Smallest valid module call |
 | [`examples/packer-consumer/`](examples/packer-consumer/) | Consumer-shaped output for Packer variables |
 | [`examples/adoption-recovery/`](examples/adoption-recovery/) | Explicit unmanaged-file adoption path |
-| [`examples/failure-cases/`](examples/failure-cases/) | Documented invalid configurations |
 
 ## Local Validation
 
@@ -109,13 +107,6 @@ Run the same core gates used by CI:
 make ci
 ```
 
-Run graph validation when Terraform dependency shape, graph tooling, fixtures, or release
-evidence changes:
-
-```bash
-make graph
-```
-
 The CI target checks Terraform formatting, initialization, validation, tests, TFLint,
 generated Terraform docs drift, documentation layout, and OPA policy tests.
 
@@ -123,38 +114,35 @@ generated Terraform docs drift, documentation layout, and OPA policy tests.
 
 | Control | Evidence |
 | --- | --- |
-| Terraform format, init, validate, test, TFLint, docs drift, docs layout, and OPA policy tests | `PR Validation` workflow running `make ci` |
-| Markdown linting and workflow linting | `Repo CI` workflow |
+| Terraform format, init, validate, test, TFLint, docs drift, docs layout, and OPA policy tests | `CI` workflow running `make ci` |
 | GitHub Actions static analysis | `CodeQL Analysis` workflow |
 | Filesystem, IaC, and secret scanning | `Security Scan` workflow |
-| Terraform graph generation and dependency-cycle detection | `Terraform Graph Regression` workflow and `make graph` |
-| Release PRs, changelog, and tags | `Release Please` workflow |
-| Release evidence artifact | `Release Evidence` workflow |
+| OpenSSF repository posture checks | `Scorecard` workflow |
+| Template and org baseline drift | `Template Sync` and `Org ADR Sync` workflows |
+| SHA pinning, exact pins, and privileged-workflow safety | `Repo Hygiene` workflow |
+| Release PRs, changelog, tags, and evidence | `Release` workflow |
 | Dependency update PRs | Renovate |
 
 ## Documentation
 
 - [Use from a Packer template repo](docs/how-to/use-from-a-packer-template.md)
 - [Develop this module](docs/how-to/develop-this-module.md)
-- [Generate Terraform graphs](docs/how-to/generate-terraform-graphs.md)
 - [Review release evidence](docs/how-to/review-release-evidence.md)
 - [Adopt this template](docs/how-to/adopt-this-template.md)
 - [Architecture](docs/explanation/architecture.md)
 - [Testing strategy](docs/explanation/testing-strategy.md)
-- [Dependency graph validation](docs/explanation/dependency-graph-validation.md)
 - [Threat model](docs/explanation/threat-model.md)
 - [Terraform reference](docs/reference/terraform.md)
 - [Release gates](docs/reference/release-gates.md)
-- [Graph artifacts](docs/reference/graph-artifacts.md)
 - [Module invariants](docs/reference/invariants.md)
-- [Golden template contract](docs/reference/golden-template-contract.md)
+- [Template mirroring contract](docs/reference/mirroring.md)
 - [Decision records](docs/decision-records/README.md)
 
 ## Security
 
 The integrity of the upstream ISO source is outside this module's threat model. Consumers
 are responsible for sourcing trustworthy SHA-256 values from upstream distribution
-channels. See [`SECURITY.md`](SECURITY.md) and
+channels. See the inherited [organization security policy](https://github.com/nwarila-platform/.github/blob/main/SECURITY.md) and
 [`docs/explanation/threat-model.md`](docs/explanation/threat-model.md) for the boundary
 and reporting flow.
 
