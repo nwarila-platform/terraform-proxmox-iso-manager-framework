@@ -153,3 +153,5 @@
 
 # Terraform state, raw plan files, provider caches, lockfiles, credentials, and
 # environment-specific tfvars remain ignored by the deny-all default.
+!/docs/decision-records/org/0005-keep-github-control-planes-namespace-local.md
+!/.github/workflows/org-adr-auto-sync.yaml

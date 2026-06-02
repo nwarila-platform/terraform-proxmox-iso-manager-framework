@@ -1,11 +1,4 @@
-name: Org ADR Sync
-# Verifies that org-baseline files (ADR mirrors + Diataxis .gitkeep markers)
-# match the canonical nwarila-platform/.github copies. Uses the canonical
-# NWarila/drift-gate composite action against
-# nwarila-platform/.github/baseline-manifest.json.
-#
-# Mirrors the template-sync.yaml pattern; only the source-repo + source-ref
-# differ.
+﻿name: Org ADR Sync
 
 on:
   pull_request:
@@ -24,16 +17,16 @@ concurrency:
 
 jobs:
   baseline:
-    name: org-baseline / verify
+    name: org-adr / verify
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Drift gate (nwarila-platform/.github baseline)
+      - name: Drift gate (org ADR baseline)
         # renovate: datasource=git-refs depName=NWarila/drift-gate
-        uses: NWarila/drift-gate@dd091e7d730b2711e09bf86c8d66b7e9b873dd53 # main @ 2026-05-26
+        uses: NWarila/drift-gate@dac07c2b2a30a084b3577d4712549291ae99879c
         with:
           source-repo: nwarila-platform/.github
           # renovate: depName=nwarila-platform/.github packageName=nwarila-platform/.github
-          source-ref: 8e890d1f41fc2e4fb6162af13729ca1dfd232dd7
-          manifest: baseline-manifest.json
-          check-name: org-baseline / verify
+          source-ref: 0d2a0752d4c618907d735af4a7c12a9214c8517e
+          manifest: org-adr-manifest.json
+          check-name: org-adr / verify

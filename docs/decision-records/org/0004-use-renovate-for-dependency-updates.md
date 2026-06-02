@@ -1,19 +1,24 @@
 # ADR-0004: Use Renovate for Dependency Updates with Per-Template Baselines
 
-| Field          | Value                                    |
-| -------------- | ---------------------------------------- |
-| Status         | Accepted                                 |
-| Date           | 2026-05-05                               |
-| Authors        | Nick Warila (@NWarila)                   |
-| Decision-maker | Nick Warila (sole portfolio maintainer)  |
-| Consulted      | None.                                    |
-| Informed       | None.                                    |
-| Reversibility  | Medium                                   |
-| Review-by      | N/A (Accepted)                           |
+| Field            | Value                                                                            |
+| ---------------- | -------------------------------------------------------------------------------- |
+| ID               | ADR-0004                                                                         |
+| Scope            | Org baseline                                                                     |
+| Status           | Accepted                                                                         |
+| Decision-subject | Dependency-update tooling and Renovate baseline inheritance for `nwarila-platform`. |
+| Date accepted    | 2026-05-05                                                                       |
+| Date             | 2026-06-02                                                                       |
+| Last reviewed    | 2026-06-02                                                                       |
+| Authors          | Nick Warila (@NWarila)                                                           |
+| Decision-makers  | Nick Warila (sole portfolio maintainer)                                          |
+| Consulted        | Renovate preset documentation and current template/consumer configs.             |
+| Informed         | Maintainers of adopting repositories under `nwarila-platform`.                   |
+| Reversibility    | Medium                                                                           |
+| Review-by        | 2026-11-29                                                                       |
 
 ## TL;DR
 
-All `nwarila-platform/*` repositories track dependency updates via [Renovate](https://docs.renovatebot.com/). Each **type-template** in the portfolio (e.g. `NWarila/terraform-runner-template`, `NWarila/packer-template`, `NWarila/python-template`) owns a complete, self-contained `renovate.json5` that is the canonical Renovate baseline for every consumer of that template. Consumers' local `.github/renovate.json5` extends only their type-template (e.g. `extends: ["github>NWarila/terraform-runner-template"]`) and adds only the overrides genuinely specific to that consumer. There is **no** org-level shared `renovate.json5` — the org repo (`nwarila-platform/.github`) holds ADRs and policies, not Renovate config. Renovate replaces Dependabot at the org level because Dependabot does not update Terraform's `required_version` field and has incomplete coverage of pinned tool versions in adjacent tooling. The per-template-baseline pattern keeps each stack's Renovate policy self-contained, lets stacks evolve their settings independently, and aligns with the three-tier ADR model from [ADR-0001](0001-use-architecture-decision-records.md): stack-level concerns live at the template tier, not the org tier.
+All `nwarila-platform/*` repositories track dependency updates via [Renovate](https://docs.renovatebot.com/). Each **type-template** in the portfolio (e.g. `NWarila/terraform-runner-template`, `NWarila/terraform-framework-template`, `NWarila/packer-framework-template`, `NWarila/packer-runner-template`, `NWarila/python-template`) owns a complete, self-contained `.github/renovate.json5` that is the canonical Renovate baseline for every consumer of that template. Consumers' local `.github/renovate.json5` extends only their type-template's explicit preset file (e.g. `extends: ["github>NWarila/terraform-runner-template//.github/renovate.json5"]`) and adds only the overrides genuinely specific to that consumer. The explicit path is required because Renovate resolves bare `github>owner/repo` presets to `default.json`, while these type-template baselines intentionally live at `.github/renovate.json5` so the template repository itself uses the same file Renovate evaluates. There is **no** org-level shared `renovate.json5` — the org repo (`nwarila-platform/.github`) holds ADRs and policies, not Renovate config. Renovate replaces Dependabot at the org level because Dependabot does not update Terraform's `required_version` field and has incomplete coverage of pinned tool versions in adjacent tooling. The per-template-baseline pattern keeps each stack's Renovate policy self-contained, lets stacks evolve their settings independently, and aligns with the three-tier ADR model from [ADR-0001](0001-use-architecture-decision-records.md): stack-level concerns live at the template tier, not the org tier.
 
 ## Context and Problem Statement
 
@@ -60,7 +65,7 @@ Chosen option: **Option 4, Renovate with self-contained type-template baselines.
 
 Each **type-template** in the portfolio owns a complete, self-contained `.github/renovate.json5` that is the single source of truth for its stack. Consumers of that template extend only the template; there is no org-level `renovate.json5` and consumers do not extend more than one config.
 
-The Terraform-runner template's baseline (`NWarila/terraform-runner-template/.github/renovate.json5`) is the canonical pattern. Other type-templates (`NWarila/packer-template`, `NWarila/python-template`, etc.) carry their own baselines tailored to their stack as they're brought online.
+The Terraform-runner template's baseline (`NWarila/terraform-runner-template/.github/renovate.json5`) is the canonical pattern. Other type-templates (`NWarila/terraform-framework-template`, `NWarila/packer-framework-template`, `NWarila/packer-runner-template`, `NWarila/python-template`, etc.) carry their own baselines tailored to their stack as they are brought online.
 
 Each type-template baseline configures, at minimum:
 
@@ -74,7 +79,7 @@ Each type-template baseline configures, at minimum:
 
 Each adopting consumer carries a minimal `.github/renovate.json5` that:
 
-- Inherits the template baseline via `extends: ["github>NWarila/<type-template>"]`.
+- Inherits the template baseline via `extends: ["github>NWarila/<type-template>//.github/renovate.json5"]`.
 - Adds only the overrides that are genuinely repo-specific (e.g. a single repo's release schedule, a single repo's automerge policy). Stack-wide overrides MUST be made in the type-template, not duplicated in every consumer.
 
 The `.github/dependabot.yml` file MUST NOT exist in any adopting repository. Repositories that previously contained one MUST remove it as part of their Renovate migration PR.
@@ -151,7 +156,7 @@ The org repo (`nwarila-platform/.github`) intentionally holds **no** `renovate.j
 Adherence to this ADR is confirmed by the following mechanisms. The wording `MUST`, `SHOULD`, and `MAY` follows [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) conventions.
 
 1. **Tool-presence check.** Every adopting repository MUST contain `.github/renovate.json5`. A `.github/dependabot.yml` file MUST NOT exist; a CI script or `pre-commit` hook MAY assert its absence.
-2. **Inheritance check.** Every adopting consumer's `.github/renovate.json5` MUST include exactly one `github>NWarila/<type-template>` entry in its `extends` array, identifying the type-template the consumer derives from. A consumer that does not derive from a type-template (e.g. the type-template repos themselves, or a one-off repo with no template lineage) MUST document its exception in a repo-specific superseding ADR.
+2. **Inheritance check.** Every adopting consumer's `.github/renovate.json5` MUST include exactly one `github>NWarila/<type-template>//.github/renovate.json5` entry in its `extends` array, identifying the type-template the consumer derives from and the exact preset file Renovate should load. Bare `github>NWarila/<type-template>` preset references are not compliant unless the template deliberately publishes a `default.json` preset; the current type-template baselines do not. A consumer that does not derive from a type-template (e.g. the type-template repos themselves, or a one-off repo with no template lineage) MUST document its exception in a repo-specific superseding ADR.
 3. **SHA-pin retention check.** Every type-template's `.github/renovate.json5` MUST configure `pinDigests: true` for the `github-actions` manager (typically via a `packageRules` entry). A reviewer SHOULD reject a PR to a type-template baseline that removes or disables this setting without a superseding ADR.
 4. **Schedule check.** Every type-template's `.github/renovate.json5` MUST schedule weekly or less-frequent runs. Daily or more-frequent schedules would produce avoidable PR churn across every consumer of that template.
 5. **Override discipline.** Repository-local overrides MUST be limited to repo-specific concerns. Settings that should apply to every consumer of a particular type-template MUST be added to that type-template's `renovate.json5` rather than copy-pasted into every consumer. There is no org-level Renovate baseline; settings that would otherwise be "truly universal" are duplicated across each type-template independently to preserve stack independence (see Option 4 §"Neutral").
@@ -191,9 +196,9 @@ Enforcement tooling is recommended but not mandatory at acceptance time. A repos
 This decision rests on the following assumptions. If any becomes false, this ADR should be revisited:
 
 1. The Renovate GitHub App remains free for personal-account organizations and continues to be actively maintained.
-2. Renovate continues to support the `extends: ["github>org/.github"]` shared-config pattern.
+2. Renovate continues to support GitHub-hosted presets with explicit file paths, including `.json5` preset files.
 3. The Renovate config schema remains compatible with the configuration shape used here.
-4. The org continues to use Conventional Commits + release-please for repos that publish releases. A switch to a different release tool would require adjusting `semanticCommitType` overrides in the shared baseline.
+4. The org continues to use Conventional Commits + release-please for repos that publish releases. A switch to a different release tool would require adjusting `semanticCommitType` overrides in the relevant type-template baseline.
 
 ## Supersedes
 
@@ -205,7 +210,7 @@ None (current).
 
 ## Implementing PRs
 
-Pending. Each type-template's `.github/renovate.json5` is the source of truth for its stack and is a precondition rather than an "implementing PR" of this ADR (the Terraform-runner template's baseline already exists; other type-templates' baselines will be authored or reviewed as those templates come online). Consumer migration PRs that switch from a copy-pasted Renovate config to a thin `extends: ["github>NWarila/<type-template>"]` will be listed here.
+Pending. Each type-template's `.github/renovate.json5` is the source of truth for its stack and is a precondition rather than an "implementing PR" of this ADR (the Terraform-runner template's baseline already exists; other type-templates' baselines will be authored or reviewed as those templates come online). Consumer migration PRs that switch from a copy-pasted Renovate config to a thin `extends: ["github>NWarila/<type-template>//.github/renovate.json5"]` will be listed here.
 
 ## Related ADRs
 
@@ -215,10 +220,16 @@ Pending. Each type-template's `.github/renovate.json5` is the source of truth fo
 
 ## Compliance Notes
 
-This ADR preserves the SHA-pin policy (encoded in the shared baseline as `github-actions.pinDigests: true`). It does not modify branch-protection or PR-review requirements: every Renovate PR is subject to the same `main`-branch protections as a human-authored PR, including required status checks. Future ADRs that adopt additional managers (e.g., `pre-commit`, `pip`, `docker`) inherit this ADR's defaults and need only document scope-specific divergence in repo-local config.
+This ADR preserves the SHA-pin policy (encoded in each type-template baseline as `github-actions.pinDigests: true`). It does not modify branch-protection or PR-review requirements: every Renovate PR is subject to the same `main`-branch protections as a human-authored PR, including required status checks. Future ADRs that adopt additional managers (e.g., `pre-commit`, `pip`, `docker`) inherit this ADR's defaults and need only document scope-specific divergence in repo-local config.
 
 | Framework              | Control / Practice ID                                                | Potential Evidence Contribution                                                                                                |
 | ---------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | NIST SP 800-53 Rev. 5  | SI-2 (Flaw Remediation)                                              | Renovate's automated update PRs contribute to the timely application of patches and security fixes across the org.            |
-| NIST SP 800-53 Rev. 5  | CM-3 (Configuration Change Control)                                  | The shared-baseline pattern records org-wide dependency-management policy in source control with PR review history.            |
+| NIST SP 800-53 Rev. 5  | CM-3 (Configuration Change Control)                                  | The per-template-baseline pattern records stack-wide dependency-management policy in source control with PR review history.    |
 | NIST SP 800-218 (SSDF) | PW.4 (Reuse Existing, Well-Secured Software When Feasible)           | Tracking dependency updates with SHA-pin retention preserves the supply-chain integrity posture for reused software.           |
+
+## Changelog
+
+| Date       | Change                                    | Reason                                      | Author/Role                       | Body-diff? |
+| ---------- | ----------------------------------------- | ------------------------------------------- | --------------------------------- | ---------- |
+| 2026-06-02 | Refreshed living metadata and clarified explicit Renovate preset-path compliance. | Re-review against current Renovate preset documentation and live template/consumer configs. | Portfolio maintainer / governance | Yes        |
