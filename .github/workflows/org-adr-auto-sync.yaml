@@ -1,0 +1,29 @@
+﻿name: Org ADR Auto Sync
+
+on:
+  schedule:
+    - cron: "47 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: org-adr-auto-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: org ADR auto-sync
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: nwarila-platform/.github/.github/workflows/reusable-org-adr-auto-sync.yaml@0d2a0752d4c618907d735af4a7c12a9214c8517e
+    with:
+      source_repo: nwarila-platform/.github
+      source_ref: main
+      branch_name: sync/org-adrs
+      pr_title: "[sync] refresh org ADR mirrors"
+    secrets:
+      sync_token: ${{ secrets.ORG_ADR_SYNC_TOKEN }}
