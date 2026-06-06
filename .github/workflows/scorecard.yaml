@@ -8,7 +8,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions: read-all
+permissions: {}
 
 concurrency:
   group: scorecard
@@ -17,8 +17,8 @@ concurrency:
 jobs:
   analysis:
     permissions:
-      security-events: write
-      id-token: write
-      actions: read
+      security-events: write # required to upload Scorecard SARIF
+      id-token: write # required by OpenSSF Scorecard tokenless attestation
+      actions: read # required by code-scanning upload metadata
       contents: read
     uses: NWarila/.github/.github/workflows/reusable-scorecard.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee

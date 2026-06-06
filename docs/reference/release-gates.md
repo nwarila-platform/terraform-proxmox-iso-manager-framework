@@ -16,8 +16,11 @@ PR-time gates run via `make ci` in `ci.yaml`:
 | Docs layout enforcement | `tools/check_docs_layout.py` | Yes | Enforces Diataxis quadrant and ADR locations. |
 | OPA policies | `opa test policies/opa` | Yes | |
 
-Security gates run in `security.yaml` (Trivy, Gitleaks, zizmor) and `codeql.yaml`
-(CodeQL Actions analysis); supply-chain signals come from `scorecard.yaml`.
+Security caller workflows delegate to org-owned reusable scanners: `security.yaml`
+invokes Trivy, Gitleaks, and zizmor; `codeql.yaml` invokes CodeQL Actions
+analysis; `scorecard.yaml` invokes OpenSSF Scorecard. Local proof covers the
+caller wiring, pinned reusable references, and upload permissions; scanner
+implementation and tool-version proof live in the upstream reusable workflows.
 
 Release evidence is produced by `release.yaml`'s `evidence` job, which invokes the
 canonical `NWarila/terraform-framework-template` reusable-release-evidence reusable

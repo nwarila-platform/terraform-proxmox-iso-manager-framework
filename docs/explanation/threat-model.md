@@ -92,9 +92,13 @@ This module assumes the following adversaries:
 
 ## Related security controls outside this module
 
-- The repository's CI runs Trivy (filesystem misconfig + secret scan), Gitleaks
-  (commit-history secret scan), CodeQL (Actions analysis), and actionlint (workflow
-  lint) on every push and PR.
+- The repository's local CI runs Terraform formatting, initialization, validation,
+  tests, TFLint, terraform-docs drift detection, docs layout checks, and OPA policy
+  tests on every push and PR.
+- Separate local caller workflows invoke org-owned reusable Trivy, Gitleaks,
+  zizmor, CodeQL, and OpenSSF Scorecard workflows. Their scanner implementation and
+  tool-version proof live upstream; this repository owns the caller wiring and
+  scoped upload permissions.
 - GitHub Actions workflows are SHA-pinned per the org policy.
 - Terraform and provider versions are exact-pinned in
   [`../../terraform/versions.tf`](../../terraform/versions.tf).

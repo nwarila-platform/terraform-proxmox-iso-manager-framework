@@ -42,19 +42,19 @@ jobs:
     # releases on push; otherwise only explicit workflow_dispatch fires this.
     if: ${{ (github.event_name == 'push' && vars.RELEASE_PLEASE_ON_PUSH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-please') }}
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      actions: write
+      contents: write # required to create release commits, tags, and notes
+      pull-requests: write # required to create and update release PRs
+      issues: write # required to label and comment on release-tracking issues
+      actions: write # required to dispatch release evidence after publishing
     uses: NWarila/.github/.github/workflows/reusable-release-please.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
 
   evidence:
     name: Release Evidence
     if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-evidence') }}
     permissions:
-      attestations: write
-      contents: write
-      id-token: write
+      attestations: write # required to publish artifact attestations
+      contents: write # required to attach release evidence artifacts
+      id-token: write # required by artifact attestation provenance
     uses: NWarila/terraform-framework-template/.github/workflows/reusable-release-evidence.yaml@3b0a832f38e8057d8531e890a666242dc32cab21
     with:
       # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$ versioning=hashicorp
