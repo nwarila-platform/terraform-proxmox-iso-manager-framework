@@ -16,7 +16,6 @@ on:
 
 permissions:
   contents: read
-  checks: write
 
 concurrency:
   group: template-sync-${{ github.ref }}
@@ -27,6 +26,9 @@ jobs:
     name: framework-template / verify
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: write # required for drift-gate to publish inline PR annotations
     steps:
       - name: Drift gate (framework-template baseline)
         # renovate: datasource=git-refs depName=NWarila/drift-gate

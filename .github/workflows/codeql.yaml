@@ -20,6 +20,6 @@ jobs:
   analyze:
     permissions:
       contents: read
-      security-events: write
-      actions: read
+      security-events: write # required to upload CodeQL SARIF
+      actions: read # required by CodeQL upload-sarif to associate results with the run
     uses: NWarila/.github/.github/workflows/reusable-codeql.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee

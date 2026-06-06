@@ -13,7 +13,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: read # required to inspect trusted-bot PR metadata
 
 concurrency:
   group: auto-merge-${{ github.event.pull_request.number }}
@@ -22,6 +22,6 @@ concurrency:
 jobs:
   auto-merge:
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # required by the reusable to enable auto-merge on trusted PRs
+      pull-requests: write # required by the reusable to update PR auto-merge state
     uses: NWarila/.github/.github/workflows/reusable-auto-merge.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
