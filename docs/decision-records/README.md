@@ -32,7 +32,7 @@ Do not edit these files directly; changes must land at the master location in
 | [0002](org/0002-adopt-diataxis-documentation-framework.md)     | Adopt Diataxis as the Documentation Framework                   | Accepted | 2026-04-24 |
 | [0003](org/0003-use-deny-all-gitignore-strategy.md)            | Use a Deny-All `.gitignore` Strategy                            | Accepted | 2026-04-25 |
 | [0004](org/0004-use-renovate-for-dependency-updates.md)        | Use Renovate for Dependency Updates with Per-Template Baselines | Accepted | 2026-05-05 |
-| [org/0005](org/0005-keep-github-control-planes-namespace-local.md) | Keep GitHub Control Planes Namespace-Local | Accepted | 2026-06-02 | Use the owning namespace control plane for governance, ADRs, repo hygiene, and reusable workflow callers. |
+| [0005](org/0005-keep-github-control-planes-namespace-local.md)     | Keep GitHub Control Planes Namespace-Local                      | Accepted | 2026-06-02 |
 
 ### Repository-Specific
 
