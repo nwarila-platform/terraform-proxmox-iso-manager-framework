@@ -1,5 +1,5 @@
 name: Repo Hygiene
-# Caller for the canonical NWarila/.github reusable-repo-hygiene workflow.
+# Caller for the canonical nwarila-platform/.github reusable-repo-hygiene workflow.
 # Evaluates the universal repo_hygiene OPA
 # policy (SHA-pinned uses:, exact terraform/provider pins, pull_request_target
 # boundary safety) against this consumer's tree without mirroring the policy
@@ -24,6 +24,6 @@ jobs:
   hygiene:
     permissions:
       contents: read
-    uses: NWarila/.github/.github/workflows/reusable-repo-hygiene.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
+    uses: nwarila-platform/.github/.github/workflows/reusable-repo-hygiene.yaml@0d2a0752d4c618907d735af4a7c12a9214c8517e
     with:
-      source_ref: f25d8d5c0fdedca23671be7bfe635b66081bfeee
+      source_ref: 0d2a0752d4c618907d735af4a7c12a9214c8517e

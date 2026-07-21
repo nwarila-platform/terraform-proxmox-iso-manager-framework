@@ -46,7 +46,7 @@ jobs:
       pull-requests: write # required to create and update release PRs
       issues: write # required to label and comment on release-tracking issues
       actions: write # required to dispatch release evidence after publishing
-    uses: NWarila/.github/.github/workflows/reusable-release-please.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
+    uses: nwarila-platform/.github/.github/workflows/reusable-release-please.yaml@0d2a0752d4c618907d735af4a7c12a9214c8517e
 
   evidence:
     name: Release Evidence

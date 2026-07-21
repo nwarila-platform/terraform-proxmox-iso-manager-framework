@@ -5,9 +5,8 @@ name: Template Sync
 # drift-gate.yaml against NWarila/.github).
 #
 # Detection-only: this workflow does not open sync PRs. Trigger is schedule
-# plus workflow_dispatch; pull_request gating will be added after the
-# missing baseline-manifest.json files are backfilled into this consumer
-# (tracked in docs/reference/production-readiness-handoff.md).
+# plus workflow_dispatch; pull_request gating will be added after consumer
+# baseline manifests are backfilled into this repository.
 
 on:
   schedule:

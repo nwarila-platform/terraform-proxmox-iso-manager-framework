@@ -1,4 +1,5 @@
 PYTHON ?= python3
+TFLINT ?= tflint
 
 # Mutating: rewrites HCL in place. Use locally before committing.
 fmt:
@@ -29,7 +30,8 @@ docs-check:
 	$(PYTHON) tools/check_docs_layout.py
 
 tflint:
-	tflint --chdir=terraform
+	$(TFLINT) --init --config "$(CURDIR)/.tflint.hcl"
+	$(TFLINT) --config "$(CURDIR)/.tflint.hcl" --chdir terraform
 
 opa-test:
 	opa test policies/opa

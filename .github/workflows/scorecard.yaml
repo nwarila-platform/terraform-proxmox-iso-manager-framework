@@ -21,4 +21,4 @@ jobs:
       id-token: write # required by OpenSSF Scorecard tokenless attestation
       actions: read # required by code-scanning upload metadata
       contents: read
-    uses: NWarila/.github/.github/workflows/reusable-scorecard.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
+    uses: nwarila-platform/.github/.github/workflows/reusable-scorecard.yaml@0d2a0752d4c618907d735af4a7c12a9214c8517e

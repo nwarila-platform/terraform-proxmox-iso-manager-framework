@@ -1,8 +1,8 @@
 name: Auto-Merge
-# Caller for NWarila/.github reusable-auto-merge workflow.
-# Enables GitHub auto-merge on trusted-bot PRs (Renovate, template-sync,
-# release-please) once required status checks pass. Human-authored PRs are
-# never auto-merged. Renovate manages the SHA pin.
+# Caller for the namespace-local reusable-auto-merge workflow.
+# Enables GitHub auto-merge on trusted-bot PRs (Renovate and release-please)
+# once required status checks pass. Human-authored PRs are
+# never auto-merged. Review this SHA pin with the namespace workflow pins.
 
 on:
   # zizmor: ignore[dangerous-triggers] auto-merge requires pull_request_target
@@ -24,4 +24,4 @@ jobs:
     permissions:
       contents: write # required by the reusable to enable auto-merge on trusted PRs
       pull-requests: write # required by the reusable to update PR auto-merge state
-    uses: NWarila/.github/.github/workflows/reusable-auto-merge.yaml@f25d8d5c0fdedca23671be7bfe635b66081bfeee
+    uses: nwarila-platform/.github/.github/workflows/reusable-auto-merge.yaml@0d2a0752d4c618907d735af4a7c12a9214c8517e
