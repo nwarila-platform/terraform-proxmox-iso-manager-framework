@@ -1,0 +1,12 @@
+name: Template drift
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  template-drift:
+    uses: nwarila-platform/.github/.github/workflows/reusable-template-drift.yaml@4f3d35fef0fde02952b7ad36db8c29ae7eec698a
+    with:
+      template_ref: 4f3d35fef0fde02952b7ad36db8c29ae7eec698a
