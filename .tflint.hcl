@@ -1,5 +1,5 @@
 tflint {
-  required_version = ">= 0.50"
+  required_version = "= 0.62.0"
 }
 
 config {
@@ -50,6 +50,13 @@ rule "terraform_documented_variables" {
 rule "terraform_naming_convention" {
   enabled = true
   format  = "snake_case"
+}
+
+# This child module uses resources.tf as its primary resource file per
+# repo ADR 0001 instead of a catch-all main.tf.
+
+rule "terraform_standard_module_structure" {
+  enabled = false
 }
 
 # endregion --- [ Rule overrides ] --------------------------------------------------------- #

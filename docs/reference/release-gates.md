@@ -11,12 +11,12 @@ PR-time gates run via `make ci` in `ci.yaml`:
 | terraform init -backend=false | `terraform init` | Yes | Initializes providers without backend or state. |
 | terraform validate | `terraform validate` | Yes | |
 | terraform test | `terraform test` | Yes | Uses `mock_provider` for Proxmox. |
-| tflint | `tflint --chdir=terraform` | Yes | |
+| tflint | `tflint --config .tflint.hcl --chdir terraform` | Yes | |
 | terraform-docs sync | `terraform-docs --output-check` | Yes | Fails if `docs/reference/terraform.md` is out of sync. |
 | Docs layout enforcement | `tools/check_docs_layout.py` | Yes | Enforces Diataxis quadrant and ADR locations. |
 | OPA policies | `opa test policies/opa` | Yes | |
 
-Security caller workflows delegate to org-owned reusable scanners: `security.yaml`
+Security caller workflows delegate to namespace-owned reusable scanners: `security.yaml`
 invokes Trivy, Gitleaks, and zizmor; `codeql.yaml` invokes CodeQL Actions
 analysis; `scorecard.yaml` invokes OpenSSF Scorecard. Local proof covers the
 caller wiring, pinned reusable references, and upload permissions; scanner
@@ -28,7 +28,7 @@ with `repo_type: framework`. See [`docs/how-to/review-release-evidence.md`](../h
 for the artifact contract.
 
 Release Please publishes release notes and tags. `release.yaml`'s `release-please`
-job invokes the canonical `reusable-release-please` reusable, which dispatches
+job invokes the namespace-local `reusable-release-please` reusable, which dispatches
 `release.yaml` back with `task=release-evidence` after publishing a release
 (GITHUB_TOKEN-driven `workflow_dispatch` is exempt from the no-cascade rule).
 Push-triggered runs require repo variable `RELEASE_PLEASE_ON_PUSH=true`.

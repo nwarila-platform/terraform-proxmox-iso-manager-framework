@@ -52,11 +52,8 @@
 !/docs/reference/terraform.md
 !/docs/reference/release-gates.md
 !/docs/reference/invariants.md
-!/docs/reference/production-readiness-handoff.md
 !/docs/reference/mirroring.md
 !/docs/reference/runner-protocol.md
-!/docs/reference/architecture-review.md
-!/docs/reference/file-audit.md
 
 !/docs/how-to/
 !/docs/how-to/.gitkeep

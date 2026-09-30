@@ -15,8 +15,8 @@
 
 This repository consumes `NWarila/terraform-framework-template` as the
 canonical golden standard for Terraform module repositories under `nwarila`
-and `nwarila-platform`. Universal CI reusables are owned by and called from
-`NWarila/.github`; the framework template owns only the type-specific
+and `nwarila-platform`. Namespace governance reusables are owned by and called
+from `nwarila-platform/.github`; the framework template owns the type-specific
 reusables (`reusable-release-evidence`, `reusable-terraform-deploy`). Workflow
 callers reference each reusable from its owning repo by SHA. Baseline drift is
 detected by the canonical `NWarila/drift-gate` action against the template's
@@ -35,12 +35,12 @@ diverge, OPA rules vary, contract checks become wishful prose, and the
 "golden standard" exists only by convention.
 
 `NWarila/terraform-framework-template` is that single source for
-Terraform-specific rigor. Following the org-wide reusable-centralization, the
-six **universal** reusables (`reusable-codeql.yaml`,
+Terraform-specific rigor. Following the namespace-local control-plane decision,
+the six **namespace governance** reusables (`reusable-codeql.yaml`,
 `reusable-iac-security.yaml`, `reusable-scorecard.yaml`,
 `reusable-release-please.yaml`, `reusable-auto-merge.yaml`, and
-`reusable-repo-hygiene.yaml`) are owned by and called from `NWarila/.github`;
-the framework template owns only the
+`reusable-repo-hygiene.yaml`) are owned by and called from
+`nwarila-platform/.github`; the framework template owns only the
 **type-specific** reusables (`reusable-release-evidence.yaml`,
 `reusable-terraform-deploy.yaml`) plus a `baseline-manifest.json` enumerating
 files that consumers must mirror byte-for-byte.
@@ -65,13 +65,13 @@ Chosen option: consume `NWarila/terraform-framework-template` by SHA.
 Mechanics:
 
 - Each consumer-side workflow is a thin caller that invokes a corresponding
-  `reusable-*.yaml` from its owning repo at a SHA pin. The universal callers —
+  `reusable-*.yaml` from its owning repo at a SHA pin. The namespace callers —
   `codeql.yaml`, `scorecard.yaml`, `security.yaml`, `auto-merge.yaml`,
   `repo-hygiene.yaml`, and `release.yaml`'s release-please job — target
-  `NWarila/.github`; `release.yaml`'s evidence job targets
+  `nwarila-platform/.github`; `release.yaml`'s evidence job targets
   `NWarila/terraform-framework-template` (the type-specific
-  `reusable-release-evidence`). Renovate groups the pins so callers bump
-  together.
+  `reusable-release-evidence`). Namespace pins are reviewed together, and
+  template pins are grouped by the local Renovate config.
 - `release.yaml` follows the canonical task-dispatch pattern: on push to
   `main` (gated by repo variable `RELEASE_PLEASE_ON_PUSH=true`) it calls
   `reusable-release-please`; on `release.published` (or explicit
@@ -91,16 +91,16 @@ Mechanics:
   mirror is byte-identical to `nwarila-platform/.github` at a pinned SHA.
 - `policies/opa/iso_manager.rego` retains rules specific to the ISO manager
   domain (HTTPS-only URLs, `overwrite_unmanaged` restrictions,
-  `checksum_algorithm = "sha256"`, `verify = true`). Universal repository
+  `checksum_algorithm = "sha256"`, `verify = true`). Namespace repository
   hygiene rules run through this repo's `repo-hygiene.yaml` caller of
-  `NWarila/.github`.
+  `nwarila-platform/.github`.
 
 ## Consequences
 
 ### Positive
 
-- A single SHA bump in `.github/renovate.json5`'s
-  `terraform-framework-template` group propagates every consumed reusable.
+- Template SHA bumps propagate template-owned reusable and baseline updates;
+  namespace reusable pins stay aligned with `nwarila-platform/.github`.
 - `template-sync.yaml` mechanically surfaces baseline drift against the
   template's manifest. Failures land as inline check-run annotations.
 - `auto-merge.yaml` enables hands-off Renovate PR merging when CI is green.
@@ -135,9 +135,9 @@ Mechanics:
   reporting drift via check-run annotations.
 - `ci.yaml` runs `make ci` on every PR; the same gates run locally via
   `make ci`.
-- The `terraform-framework-template` SHA appears in every caller workflow's
-  `uses:` reference with a Renovate `# renovate:` annotation; pin freshness
-  is therefore observable through Renovate's PR queue.
+- The template SHA appears in template-owned caller workflow references, and
+  namespace governance callers pin `nwarila-platform/.github` by full commit
+  SHA; pin freshness is observable through review of the workflow diffs.
 
 ## Related ADRs
 
